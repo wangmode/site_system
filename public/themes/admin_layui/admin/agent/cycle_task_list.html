@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>循环任务列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="__TMPL__/public/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="__TMPL__/public/style/admin.css" media="all">
+    <script type="text/javascript" src="__TMPL__/public/js/jquery.min.js"></script>
+    <script type="text/javascript" src="__TMPL__/public/layui/layui.js"></script>
+    <script type="text/javascript" src="__TMPL__/public/layui/admin.js"></script>
+    <script type="text/javascript" src="__TMPL__/public/layui/lay/modules/util.js"></script>
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-tab layui-tab-brief">
+            <ul class="layui-tab-title">
+                <li><a href="{:url('Agent/agentInfo',array('agent_id'=>$agent_id))}">详细信息</a></li>
+                <li><a href="{:url('Agent/signList',array('agent_id'=>$agent_id))}">签名列表</a></li>
+                <li><a href="{:url('Agent/templateList',array('agent_id'=>$agent_id))}">模板列表</a></li>
+                <li class="layui-this"><a href="javascript:;">循环任务列表</a></li>
+                <li><a href="{:url('Agent/taskList',array('agent_id'=>$agent_id))}">普通任务列表</a></li>
+                <li><a href="{:url('Agent/sendRecordList',array('agent_id'=>$agent_id))}">消息记录列表</a></li>
+            </ul>
+        </div>
+        <div class="layui-form layui-card-header layuiadmin-card-header-auto">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" name="start_time" id="start_time" placeholder="请选择筛选起始时间" autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-input-inline">
+                        <input type="text" name="end_time" id="end_time" placeholder="请选择筛选结束时间" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select id="product_id" name="product_id" lay-filter="required">
+                            <option value="">请选择产品</option>
+                            <volist name="product_list" id="product">
+                                <option value="{$product.id}">{$product.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select id="select_status" name="status" lay-filter="required">
+                            <option value="">请选择状态</option>
+                            <option value="0">停用</option>
+                            <option value="1">启用</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select id="select_is_del" name="is_del" lay-filter="required">
+                            <option value="">请选择状态</option>
+                            <option value="0">正常</option>
+                            <option value="1">删除</option>
+                        </select>
+                    </div>
+                </div>
+
+
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" name="keyword" id="search" placeholder="请输入查询签名或模板名称" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-inline search">
+                    <button class="layui-btn" data-type="reload" type="button">搜索</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-card-body">
+            <table id="dataTable" lay-filter="dataTable"></table>
+            <script type="text/html" id="is_del">
+                {{#  if(d.is_del === 0){ }}
+                正常
+                {{#  } else if(d.is_del === 1) { }}
+                删除
+                {{#  } else { }}
+                错误
+                {{#  } }}
+            </script>
+            <script type="text/html" id="status">
+                {{#  if(d.status === 0){ }}
+                停用
+                {{#  } else if(d.status === 1) { }}
+                启用
+                {{#  } else { }}
+                错误
+                {{#  } }}
+            </script>
+            <script type="text/html" id="cycle">
+                {{#  if(d.send_cycle === 1){ }}
+                    每年
+                {{#  } else if(d.send_cycle === 2) { }}
+                    每月
+                {{#  } else if(d.send_cycle === 3) { }}
+                    每周
+                {{#  } else if(d.send_cycle === 4) { }}
+                    每日
+                {{#  } else { }}
+                    错误
+                {{#  } }}
+            </script>
+            <script type="text/html" id="options">
+                <div class="layui-btn-group">
+                    <button class="layui-btn layui-btn-sm" type="button" lay-event="cycle">查看任务详情</button>
+                    <button class="layui-btn layui-btn-sm" type="button" lay-event="task">查看发送列表</button>
+                    {{#  if(d.status === 1){ }}
+                    <button class="layui-btn layui-btn-sm layui-btn-danger" id="button{{d.id}}" type="button"  lay-event="disable">停用</button>
+                    {{#  } else { }}
+                    <button class="layui-btn layui-btn-sm layui-btn-disabled" id="button{{d.id}}" type="button" lay-event="disable">停用</button>
+                    {{#  } }}
+                </div>
+            </script>
+        </div>
+        <script>
+            layui.config({
+                base: '__TMPL__/public/', //静态资源所在路径
+            }).extend({
+                index: 'lib/index' //主入口模块
+            }).use(['layer','table','form','laydate'],function () {
+                var layer = layui.layer;
+                var form = layui.form;
+                var table = layui.table;
+
+                var laydate = layui.laydate;
+                laydate.render({
+                    elem: '#start_time' //指定元素
+                });
+                laydate.render({
+                    elem: '#end_time' //指定元素
+                });
+
+                //用户表格初始化
+                var dataTable = table.render({
+                    elem: '#dataTable'
+                    ,url: "{:url('Agent/getCycleTaskListData',array('agent_id'=>$agent_id))}" //数据接口
+                    ,page: true //开启分页
+                    ,cols: [[ //表头
+                        {field: 'sign', title: '签名名称'}
+                        ,{field: 'name', title: '模板名称'}
+                        ,{field: 'product_name', title: '产品类别',width:100}
+                        ,{field: 'is_del', title: '删除状态',templet: '#is_del',width:90}
+                        ,{field: 'status', title: '状态',templet: '#status',width:60}
+                        ,{field: 'send_cycle', title: '发送周期',templet: '#cycle',width:90}
+                        ,{field: 'send_time', title: '预定发送时间',width:150}
+                        ,{field: 'create_at', title: '创建时间',width:160}
+                        ,{fixed: 'right', title: '操作',width: 260, align:'left', toolbar: '#options'}
+                    ]]
+                });
+
+                //监听行工具事件
+                table.on('tool(dataTable)', function(obj){
+                    var data = obj.data;
+                    if(obj.event === 'cycle'){
+                        window_open('循环任务详情','/admin/agent/cycleInfo/cycle_id/'+data.id+'.html','800','600');
+                    }else if(obj.event === 'task'){
+                        window_open('循环发送任务列表','/admin/agent/cycleTask/cycle_id/'+data.id+'.html','1500','700');
+                    }else if(obj.event === 'disable'){
+                        to_disable(data.id,"{:url('Agent/cycleTaskToDisable')}");
+                    }
+                });
+                var $ = layui.$, active = {
+                    reload: function(){
+                        var search = $('#search');
+                        //执行重载
+                        table.reload('dataTable', {
+                            page: {
+                                curr: 1 //重新从第 1 页开始
+                            },
+                            where: {
+                                keyword: search.val(),
+                                status:$('#select_status').val(),
+                                is_del:$('#is_del_status').val(),
+                                product_id:$('#product_id').val(),
+                                start_time:$('#start_time').val(),
+                                end_time:$('#end_time').val(),
+                                url:$("#search_url").val(),
+                            }
+                        });
+                    }
+                };
+                $('.search .layui-btn').on('click', function(){
+                    var type = $(this).data('type');
+                    active[type] ? active[type].call(this) : '';
+                });
+            });
+            function to_disable(id,url){
+                $.ajax({
+                    url:url,
+                    data:{id:id},
+                    type:'post',
+                    dataType:'json',
+                    success:function(res){
+                        if(res.status !== 1){
+                            layer.msg(res.message, {icon: 5});
+                            return false;
+                        }else{
+                            if(res.result_status === 1){
+                                $('#button'+id).removeClass("layui-btn-disabled");
+                                $('#button'+id).addClass("layui-btn-danger");
+                            }else{
+                                $('#button'+id).addClass("layui-btn-disabled");
+                                $('#button'+id).removeClass("layui-btn-danger");
+                            }
+                            layer.msg(res.message, {icon: 6});
+                            return false;
+                        }
+                    },
+                });
+            }
+        </script>
+    </div>
+</div>
+</body>
+</html>
+
+
+

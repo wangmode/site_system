@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>模板审核</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="stylesheet" href="__TMPL__/public/layui/css/modules/layer/default/layer.css" id="layuicss-layer"   media="all">
+    <link rel="stylesheet" href="__TMPL__/public/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="__TMPL__/public/style/admin.css" media="all">
+    <script type="text/javascript" src="__TMPL__/public/js/jquery.min.js"></script>
+    <script type="text/javascript" src="__TMPL__/public/layui/layui.js"></script>
+</head>
+<body>
+<div class="x-body layui-anim layui-anim-up">
+    <div class="layui-card layui-fluid">
+        <table class="layui-table"  >
+            <colgroup>
+                <col width="100">
+                <col>
+            </colgroup>
+            <tbody>
+            <tr>
+                <td>企业名称</td>
+                <td>{$info.company}</td>
+            </tr>
+            <tr>
+                <td>模板名称</td>
+                <td>{$info.name}</td>
+            </tr>
+            <tr>
+                <td>产品类别</td>
+                <td>{$info.product_name}——￥{$info.price}元/条</td>
+            </tr>
+            <tr>
+                <td>申请时间</td>
+                <td>{$info.apply_time}</td>
+            </tr>
+            <neq name="info.status" value="0">
+                <tr>
+                    <td>审核时间</td>
+                    <td>{$info.review_time}</td>
+                </tr>
+            </neq>
+            <tr>
+                <td>当前状态</td>
+                <td>
+                    <switch name="info.status">
+                        <case value="0">审核中</case>
+                        <case value="1">已通过</case>
+                        <case value="2">已驳回</case>
+                        <default/>错误
+                    </switch>
+                </td>
+            </tr>
+            <tr>
+                <td>模板内容</td>
+                <td>{$info.content}</td>
+            </tr>
+            <eq name="info.status" value="2">
+                <tr>
+                    <td>驳回原因</td>
+                    <td>
+                        <p>{$info.reason}</p>
+                    </td>
+                </tr>
+            </eq>
+            <tr >
+                <td>申请说明</td>
+                <td>
+                    <div>{$info.description}</div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <eq name="info.status" value="0">
+            <form method="post" class="layui-form">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">
+                        <span class="x-red">审核</span>
+                    </label>
+                    <div class="layui-input-block">
+                        <input lay-filter="hide" class="layui-input-inline" type="radio" name="status" value="1" title="通过">
+                        <input lay-filter="show" class="layui-input-inline"  type="radio" name="status" value="2" title="驳回">
+                    </div>
+                </div>
+                <div id="reason_div" class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">驳回原因</label>
+                    <div class="layui-input-block"  style="width: 70%">
+                        <textarea placeholder="请填写驳回原因" id="reason" name="reason"  class="layui-textarea"></textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label"></label>
+                    <input name="id" value="{$info.id}" type="hidden">
+                    <button  class="layui-btn" lay-filter="update" lay-submit="">审核</button>
+                </div>
+            </form>
+            <else/>
+            <div class="layui-col-md1 layui-col-md-offset1">
+                <div class="grid-demo grid-demo-bg1"><button  type="button" class="layui-btn" id="close">关闭</button></div>
+            </div>
+
+        </eq>
+    </div>
+</div>
+<style>
+    html{background-color: #fff;color: black;margin-top: 20px;}
+</style>
+<script>
+    layui.config({
+        base: '__TMPL__/public/', //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'form','selectN','selectM'], function(){
+        var $ = layui.$
+            ,form = layui.form,
+            selectN = layui.selectN;
+
+        $("#close").click(function () {
+            // 获得frame索引
+            var index = parent.layer.getFrameIndex(window.name);
+            //关闭当前frame
+            parent.layer.close(index);
+            parent.layui.table.reload('dataTable');
+        })
+        form.on('radio(show)', function(data){
+            $("#reason_div").show();
+        });
+
+        form.on('radio(hide)', function(data){
+            $("#reason_div").hide();
+        });
+
+        form.on('submit(update)', function(data){
+            var status = $("input[name='status']:checked").val();
+            var reason = $("#reason").val();
+            if(status == '' || status == undefined || status== null){
+                layer.alert("请选择审核结果！");
+                return false;
+            }else if(status == 2 && (reason == '' || reason == undefined || reason== null)){
+                layer.alert("驳回模板请填写原因！");
+                return false;
+            }
+            $.ajax({
+                url:"{:url('Apply/templateExaminePost')}",
+                data:data.field,
+                type:'post',
+                dataType:'json',
+                success:function(res){
+                    if(res.status != 1){
+                        layer.msg(res.message, {icon: 5});
+                        return false;
+                    }else{
+                        layer.alert(res.message, {icon: 6},function () {
+                            // 获得frame索引
+                            var index = parent.layer.getFrameIndex(window.name);
+                            //关闭当前frame
+                            parent.layer.close(index);
+                            parent.layui.table.reload('dataTable');
+                            // window.parent.location.reload();
+                        });
+                        return false;
+                    }
+                },
+                error : function(XMLHttpRequest, textStatus, errorThrown) {
+                    layer.msg('网络错误！');
+                    return false;
+                }
+            });
+            return false;
+        });
+    });
+
+
+</script>
+</body>
+</html>

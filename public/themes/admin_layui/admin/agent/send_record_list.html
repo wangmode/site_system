@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>消息列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="__TMPL__/public/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="__TMPL__/public/style/admin.css" media="all">
+    <script type="text/javascript" src="__TMPL__/public/js/jquery.min.js"></script>
+    <script type="text/javascript" src="__TMPL__/public/layui/layui.js"></script>
+    <script type="text/javascript" src="__TMPL__/public/layui/admin.js"></script>
+    <script type="text/javascript" src="__TMPL__/public/layui/lay/modules/util.js"></script>
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-tab layui-tab-brief">
+            <ul class="layui-tab-title">
+                <li><a href="{:url('Agent/agentInfo',array('agent_id'=>$agent_id))}">详细信息</a></li>
+                <li><a href="{:url('Agent/signList',array('agent_id'=>$agent_id))}">签名列表</a></li>
+                <li><a href="{:url('Agent/templateList',array('agent_id'=>$agent_id))}">模板列表</a></li>
+                <li><a href="{:url('Agent/cycleTaskList',array('agent_id'=>$agent_id))}">循环任务列表</a></li>
+                <li><a href="{:url('Agent/taskList',array('agent_id'=>$agent_id))}">普通任务列表</a></li>
+                <li class="layui-this"><a href="javascript:;">消息记录列表</a></li>
+            </ul>
+        </div>
+        <div class="layui-form layui-card-header layuiadmin-card-header-auto">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" name="start_time" id="start_time" placeholder="请选择筛选起始时间" autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-input-inline">
+                        <input type="text" name="end_time" id="end_time" placeholder="请选择筛选结束时间" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select id="product_id" name="product_id" lay-filter="required">
+                            <option value="">请选择产品</option>
+                            <volist name="product_list" id="product">
+                                <option value="{$product.id}">{$product.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <select id="select_status" name="status" lay-filter="required">
+                            <option value="">请选择状态</option>
+                            <option value="0">发送失败</option>
+                            <option value="1">发送成功</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" name="keyword" id="search" placeholder="请输入查询签名或模板名称" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-inline search">
+                    <button class="layui-btn" data-type="reload" type="button">搜索</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-card-body">
+            <table id="dataTable" lay-filter="dataTable"></table>
+            <script type="text/html" id="status">
+                {{#if(d.status === -1){ }}
+                用户名或者密码不正确或用户禁用或者是管理账户
+                {{# } else if(d.status === 0){ }}
+                发送短信失败
+                {{#  } else if(d.status === 1) { }}
+                成功
+                {{#  } else if(d.status === 2) { }}
+                余额不够或扣费错误
+                {{#  } else if(d.status === 3) { }}
+                扣费失败异常（请联系客服）
+                {{#  } else if(d.status === 6) { }}
+                有效号码为空
+                {{#  } else if(d.status === 7) { }}
+                短信内容为空
+                {{#  } else if(d.status === 8) { }}
+                无签名，必须，格式：【签名】
+                {{#  } else if(d.status === 9) { }}
+                没有Url提交权限
+                {{#  } else if(d.status === 10) { }}
+                发送号码过多,最多支持2000个号码
+                {{#  } else if(d.status === 11) { }}
+                产品ID异常或产品禁用
+                {{#  } else if(d.status === 12) { }}
+                参数异常
+                {{#  } else if(d.status === 13) { }}
+                tkey参数错误
+                {{#  } else if(d.status === 15) { }}
+                Ip验证失败
+                {{#  } else if(d.status === 16) { }}
+                xh参数错误
+                {{#  } else if(d.status === 19) { }}
+                短信内容过长，最多支持500个,或提交编码异常导致
+                {{#  } else { }}
+                错误
+                {{#  } }}
+            </script>
+        </div>
+        <script>
+            layui.config({
+                base: '__TMPL__/public/', //静态资源所在路径
+            }).extend({
+                index: 'lib/index' //主入口模块
+            }).use(['layer','table','form','laydate'],function () {
+                var layer = layui.layer;
+                var form = layui.form;
+                var table = layui.table;
+
+                var laydate = layui.laydate;
+                laydate.render({
+                    elem: '#start_time' //指定元素
+                });
+                laydate.render({
+                    elem: '#end_time' //指定元素
+                });
+
+                //用户表格初始化
+                var dataTable = table.render({
+                    elem: '#dataTable'
+                    ,url: "{:url('Agent/getSendRecordListData',array('agent_id'=>$agent_id))}" //数据接口
+                    ,page: true //开启分页
+                    ,cols: [[ //表头
+                        {field: 'sign', title: '签名名称'}
+                        ,{field: 'name', title: '模板名称'}
+                        ,{field: 'content', title: '发送内容'}
+                        ,{field: 'product_name', title: '产品类别',width:100}
+                        ,{field: 'status', title: '状态',templet: '#status'}
+                        ,{field: 'phone', title: '发送号码',width:120}
+                        ,{field: 'send_time', title: '发送时间',width:160}
+                    ]]
+                });
+
+                var $ = layui.$, active = {
+                    reload: function(){
+                        var search = $('#search');
+                        //执行重载
+                        table.reload('dataTable', {
+                            page: {
+                                curr: 1 //重新从第 1 页开始
+                            },
+                            where: {
+                                keyword: search.val(),
+                                status:$('#select_status').val(),
+                                product_id:$('#product_id').val(),
+                                start_time:$('#start_time').val(),
+                                end_time:$('#end_time').val(),
+                                url:$("#search_url").val(),
+                            }
+                        });
+                    }
+                };
+                $('.search .layui-btn').on('click', function(){
+                    var type = $(this).data('type');
+                    active[type] ? active[type].call(this) : '';
+                });
+            });
+        </script>
+    </div>
+</div>
+</body>
+</html>
+
+
+

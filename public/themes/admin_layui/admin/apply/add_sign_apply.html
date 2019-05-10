@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加新签名</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="stylesheet" href="__TMPL__/public/layui/css/modules/layer/default/layer.css" id="layuicss-layer"   media="all">
+    <link rel="stylesheet" href="__TMPL__/public/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="__TMPL__/public/style/admin.css" media="all">
+    <script type="text/javascript" src="__TMPL__/public/js/jquery.min.js"></script>
+    <script type="text/javascript" src="__TMPL__/public/layui/layui.js"></script>
+</head>
+<body>
+<div class="x-body layui-anim layui-anim-up">
+    <form method="post" class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">客户</label>
+            <div class="layui-input-block" style="width:70%">
+                <input type="button" value="请选择客户！" id="agent" class="layui-btn layuiadmin-btn-list" >
+                <input type="hidden" id="agent_id" name="agent_id"  lay-filter="required" value="">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label for="sign" class="layui-form-label">
+                <span class="x-red">签名</span>
+            </label>
+            <div class="layui-input-inline" style="width:70%">
+                <input type="text" id="sign" name="sign" value="" required="" lay-verify="required"  autocomplete="off" class="layui-input"  maxlength="12">
+             
+                   <p id="num" style="color:#aaa"> 剩余输入字数 12/12</p>
+               
+            </div>
+        </div>
+      
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                <span class="x-red">签名来源</span>
+            </label>
+            <div class="layui-input-block">
+                <input class="layui-input-inline" type="radio" name="source" value="1" title="企事业单位的全称或简称" checked>
+                <input class="layui-input-inline"  type="radio" name="source" value="2" title="工信部备案网站的全称或简称">
+                <input class="layui-input-inline"  type="radio" name="source" value="3" title="APP应用的全称或简称">
+                <input class="layui-input-inline"  type="radio" name="source" value="4" title="公众号或小程序的全称或简称">
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">申请说明</label>
+            <div class="layui-input-block"  style="width: 70%">
+                <textarea placeholder="请描述业务使用场景" name="description"  class="layui-textarea" required="" lay-verify="required"  onchange="this.value=this.value.substring(0, 300)" maxlength="300" id="description" onkeydown="this.value=this.value.substring(0, 300)" onkeyup="this.value=this.value.substring(0, 300)"></textarea>
+                <span  id="text" style="color:#aaa">
+                    300/300
+                </span>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label"></label>
+            <button  class="layui-btn" lay-filter="update" lay-submit="" id="sub_btn">申请</button>
+        </div>
+         <script type="text/javascript">
+            layui.use(['jquery', 'layer'], function(){ 
+                  var $ = layui.$ //重点处
+                  ,layer = layui.layer;
+                  
+                  //后面就跟你平时使用jQuery一样
+                 
+                    $('#description').bind("input propertychange", function(){
+
+                          var numChar = $('#description').val().length;
+                          var val = $('#description').val();
+                          var charRemain = 300 - numChar ;
+                         
+                          //修改剩余字数
+                          if( 300 >= numChar ){
+                            $("#text").css("color","#aaa");
+                            $('#text').text(charRemain +'/300');
+                          }else {
+                            $("#text").css("color","red");
+                            $('#text').text('至多输入300字');
+                          }
+                        
+                    });
+                
+            });
+        </script>
+         <script type="text/javascript">
+            layui.use(['jquery', 'layer'], function(){
+                  var $ = layui.$ //重点处
+                  ,layer = layui.layer;
+                  //后面就跟你平时使用jQuery一样
+                    $('#sign').bind("input propertychange", function(){
+                          var numChar = $('#sign').val().length;
+                          var val = $('#sign').val();
+                          var charRemain = 12 - numChar ;
+
+                          //修改剩余字数
+                          if( 12 >= numChar ){
+                            $("#num").css("color","#aaa");
+                            $('#num').text( '剩余输入字数'+charRemain +'/12');
+                          }else {
+                            $('#num').text('至多输入12字');
+                          }
+                    });
+
+                    $('#sub_btn').click(function(){
+                         var numlen = $('#sign').val().length;
+                         var val = $('#sign').val();
+
+                         var reg=/^[1-9]\d*$|^0$/;
+                         var space = /[/&\|\\\*^%$#@\-\s\~\.\,\!\?\=\-\|\<\>\?\_\-\'\(\)\……\￥\）\（\！\/\+/。/，/、/‘/；/:/’/【/】/“/”/[//：/——/《/》/？/{/}]/;
+                         if (numlen < 2){
+                           layer.open({
+                              title: '提示'
+                              ,content: '签名内容不得小于2字'
+                            });
+                            return false;
+                         }
+                         if (reg.test(val)) {
+                            layer.open({
+                              title: '提示'
+                              ,content: '签名不能为纯数字'
+                            });
+                            return false;
+                         }
+                        if (space.test(val)) {
+                            layer.open({
+                              title: '提示'
+                              ,content: '签名不能有特殊字符或空格'
+                            });
+                            return false;
+                        }
+                    });
+            });
+        </script>
+    </form>
+</div>
+<style>
+    html{background-color: #fff;color: black;margin-top: 20px;}
+</style>
+<script type="text/html" id="check">
+    <input type="radio" name="layTableCheckbox" value="{{d.id}}"  lay-filter="check">
+</script>
+<script>
+    layui.config({
+        base: '__TMPL__/public/', //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'form','agentSelect','selectN','selectM'], function(){
+        var $ = layui.$
+            ,form = layui.form,
+            selectN = layui.selectN;
+
+        var tableSelect = layui.agentSelect;
+        tableSelect.render({
+            elem: '#agent', //定义输入框input对象
+            searchKey: 'account',   //搜索输入框的name值 默认keyword
+            searchPlaceholder: '搜索代理商', //搜索输入框的提示文字 默认关键词搜索
+            table: {    //定义表格参数，与LAYUI的TABLE模块一致，只是无需再定义表格elem
+                url:"{:url('Agent/getAgentData')}",
+                cols: [[ //表头
+                    {field:'id', title:'选择',type:'radio',  templet: '#check', unresize: true,width:50},
+                    {field: 'account', title: '账号'},
+                    {field: 'company', title: '公司名称'}
+                ]]
+            },
+            done: function (elem, data) {
+                var id='';
+                var account='';
+                $('.layui-layer-content').remove();
+                $.each(data.data,function(i,n)
+                {
+                    id=n.id;
+                    account = n.company;
+                });
+                if(id!=="" && account!== ""){
+                    $("#agent").val(account);
+                    $("#agent_id").val(id);
+                }
+            }
+
+        });
+
+        form.on('submit(update)', function(data){
+            $.ajax({
+                url:"{:url('Apply/addSignApplyPost')}",
+                data:data.field,
+                type:'post',
+                dataType:'json',
+                success:function(res){
+                    if(res.status != 1){
+                        layer.msg(res.message, {icon: 5});
+                        return false;
+                    }else{
+                        layer.alert(res.message, {icon: 6},function () {
+                            // 获得frame索引
+                            var index = parent.layer.getFrameIndex(window.name);
+                            //关闭当前frame
+                            parent.layer.close(index);
+                            parent.layui.table.reload('dataTable');
+                            // window.parent.location.reload();
+                        });
+                        return false;
+                    }
+                },
+                error : function(XMLHttpRequest, textStatus, errorThrown) {
+                    layer.msg('网络错误！');
+                    return false;
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>
