@@ -34,7 +34,9 @@ class WebConfigModel extends Model
 
     /**
      * 网站配置列表数据
-     * @param $keyword  //
+     * @param $keyword
+     * @param $status
+     * @param $is_ware
      * @param int $page
      * @param int $limit
      * @return array|\PDOStatement|string|\think\Collection
@@ -42,18 +44,25 @@ class WebConfigModel extends Model
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    static public function getWebListData($keyword,$page=1,$limit=10)
+    static public function getWebListData($keyword,$status,$is_ware,$page=1,$limit=10)
     {
         $where = [];
         if(empty($keyword) === false){
             $keyword = trim($keyword);
             $where[] = ['w.name','like',"%$keyword%"];
         }
+        if(empty($status) === false || $status === 0 || $status === '0'){
+            $where[] = ['w.status','=',$status];
+        }
+        if(empty($is_ware) === false || $is_ware === 0 || $is_ware === '0'){
+            $where[] = ['w.is_ware','=',$is_ware];
+        }
+
         return self::alias('w')
             ->leftJoin('user u','w.admin_id = u.id')
             ->where($where)
             ->limit(($page-1)*$limit,$limit)
-            ->field(['w.id','w.name','u.user_nickname','w.url','w.created.at','w.status','w.is_ware'])
+            ->field(['w.id','w.name','u.user_nickname','w.url','w.created_at','w.status','w.is_ware'])
             ->order('w.id','desc')
             ->select();
     }
@@ -62,14 +71,22 @@ class WebConfigModel extends Model
     /**
      * 网站配置列表数据条数
      * @param $keyword
+     * @param $status
+     * @param $is_ware
      * @return float|string
      */
-    static public function getWebListCount($keyword)
+    static public function getWebListCount($keyword,$status,$is_ware)
     {
         $where = [];
         if(empty($keyword) === false){
             $keyword = trim($keyword);
             $where[] = ['w.name','like',"%$keyword%"];
+        }
+        if(empty($status) === false || $status === 0 || $status === '0'){
+            $where[] = ['w.status','=',$status];
+        }
+        if(empty($is_ware) === false || $is_ware === 0 || $is_ware === '0'){
+            $where[] = ['w.is_ware','=',$is_ware];
         }
         return self::alias('w')
             ->leftJoin('user u','w.admin_id = u.id')

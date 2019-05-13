@@ -25,10 +25,12 @@ class WebController extends AdminBaseController
     {
         $page       = $this->request->param('page');
         $limit      = $this->request->param('limit');
+        $status     = $this->request->param('status');
+        $is_ware    = $this->request->param('is_ware');
         $keyword    = $this->request->param('keyword');
         try{
-            $data   = WebConfigModel::getWebListData($keyword,$page,$limit);
-            $count  = WebConfigModel::getWebListCount($keyword);
+            $data   = WebConfigModel::getWebListData($keyword,$status,$is_ware,$page,$limit);
+            $count  = WebConfigModel::getWebListCount($keyword,$status,$is_ware);
             return $this->returnListJson(self::CODE_OK, $count, $data, '获取代理客户列表成功');
         }catch (Exception $exception){
             return $this->returnListJson(self::CODE_FAIL, null, null, $exception->getMessage());
@@ -93,9 +95,9 @@ class WebController extends AdminBaseController
                 throw new Exception('非法访问');
             }
             $status = WebConfigModel::editStatus($id);
-            $this->returnStatusJson(self::STATUS_OK,$status,'修改配置状态成功！');
+            return $this->returnStatusJson(self::STATUS_OK,$status,'修改配置状态成功！');
         }catch (Exception $exception){
-            $this->returnStatusJson(self::STATUS_FAIL,null,$exception->getMessage());
+            return $this->returnStatusJson(self::STATUS_FAIL,null,$exception->getMessage());
         }
     }
 
@@ -107,9 +109,9 @@ class WebController extends AdminBaseController
                 throw new Exception('非法访问');
             }
             $status = WebConfigModel::editIsWare($id);
-            $this->returnStatusJson(self::STATUS_OK,$status,'修改抓取状态成功！');
+            return $this->returnStatusJson(self::STATUS_OK,$status,'修改抓取状态成功！');
         }catch (Exception $exception){
-            $this->returnStatusJson(self::STATUS_FAIL,null,$exception->getMessage());
+            return $this->returnStatusJson(self::STATUS_FAIL,null,$exception->getMessage());
         }
     }
 }
