@@ -58,6 +58,12 @@ class WebConfigModel extends Model
             ->select();
     }
 
+
+    /**
+     * 网站配置列表数据条数
+     * @param $keyword
+     * @return float|string
+     */
     static public function getWebListCount($keyword)
     {
         $where = [];
@@ -71,6 +77,17 @@ class WebConfigModel extends Model
             ->count();
     }
 
+    /**
+     *  添加新的网站配置
+     * @param $name
+     * @param $url
+     * @param $database
+     * @param $hostname
+     * @param $username
+     * @param $password
+     * @param $prefix
+     * @return int|string
+     */
     static public function add($name,$url,$database,$hostname,$username,$password,$prefix)
     {
         return self::insert([
@@ -89,6 +106,18 @@ class WebConfigModel extends Model
     }
 
 
+    /**
+     * 修改网站配置
+     * @param $id
+     * @param $name
+     * @param $url
+     * @param $database
+     * @param $hostname
+     * @param $username
+     * @param $password
+     * @param $prefix
+     * @return WebConfigModel
+     */
     static public function edit($id,$name,$url,$database,$hostname,$username,$password,$prefix)
     {
         return self::update([
@@ -104,37 +133,93 @@ class WebConfigModel extends Model
         ]);
     }
 
+
+    /**
+     * 修改网站状态
+     * @param $id
+     * @param $status
+     * @return WebConfigModel
+     */
     static public function updateStatus($id,$status)
     {
         return self::update([
             'id'        =>$id,
-            'status'    =>$status
+            'status'    =>$status,
+            'update_at' =>date('Y-m-d H:i:s',time())
         ]);
     }
 
+    static public function editStatus($id)
+    {
+        $status = self::getStatusById($id);
+        $status = $status == self::STATUS_YES ? self::STATUS_NO : self::STATUS_YES;
+        self::updateStatus($id,$status);
+        return self::getStatusById($id);
+    }
+
+    /**
+     * 修改抓取状态
+     * @param $id
+     * @param $is_ware
+     * @return WebConfigModel
+     */
     static public function updateIsWare($id,$is_ware)
     {
         return self::update([
             'id'        =>$id,
-            'is_ware'    =>$is_ware
+            'is_ware'   =>$is_ware,
+            'update_at' =>date('Y-m-d H:i:s',time())
         ]);
     }
 
+    static public function editIsWare($id)
+    {
+        $is_ware = self::getIsWareById($id);
+        $is_ware = $is_ware == self::IS_WARE_YES ? self::IS_WARE_NO : self::IS_WARE_YES;
+        self::updateIsWare($id,$is_ware);
+        return self::getIsWareById($id);
+    }
+
+    /**
+     * 获取网站状态
+     * @param $id
+     * @return mixed
+     */
     static public function getStatusById($id)
     {
         return self::where('id',$id)->value('status');
     }
 
+    /**
+     * 获取网站抓取状态
+     * @param $id
+     * @return mixed
+     */
     static public function getIsWareById($id)
     {
         return self::where('id',$id)->value('is_ware');
     }
 
+    /**
+     * 删除网站配置
+     * @param $id
+     * @return int
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
     static public function delWebConfig($id)
     {
         return self::where('id',$id)->delete();
     }
 
+    /**
+     * 获取网站配置详细信息
+     * @param $id
+     * @return array|\PDOStatement|string|Model|null
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     static public function getWebConfigInfoById($id)
     {
         return self::alias('w')
