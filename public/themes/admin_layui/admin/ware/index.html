@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>挖掘关键词列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="__TMPL__/public/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="__TMPL__/public/style/admin.css" media="all">
+    <script type="text/javascript" src="__TMPL__/public/js/jquery.min.js"></script>
+    <script type="text/javascript" src="__TMPL__/public/layui/layui.js"></script>
+    <script type="text/javascript" src="__TMPL__/public/layui/admin.js"></script>
+    <script type="text/javascript" src="__TMPL__/public/layui/lay/modules/util.js"></script>
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-form layui-card-header layuiadmin-card-header-auto">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" name="keyword" id="search" placeholder="请输入查询名称" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <select id="select_status" name="status" lay-filter="required">
+                        <option value="">请选择状态</option>
+                        <option value="0">禁用</option>
+                        <option value="1">正常</option>
+                    </select>
+                </div>
+                <div class="layui-inline search">
+                    <button class="layui-btn" data-type="reload" type="button">搜索</button>
+                </div>
+            </div>
+        </div>
+        <div class="layui-card-header layuiadmin-card-header-auto" id="component-layer-list">
+            <div class="layadmin-layer-demo">
+                <button class="layui-btn layuiadmin-btn-list" onclick="add()" >添加关键词</button>
+            </div>
+        </div>
+        <div class="layui-card-body">
+            <table id="dataTable" lay-filter="dataTable"></table>
+            <script type="text/html" id="options">
+                {{#  if(d.status === 1){ }}
+                <button class="layui-btn layui-btn-sm layui-btn-warm" id="button{{d.id}}" type="button"  lay-event="disable">停用</button>
+                {{#  } else { }}
+                <button class="layui-btn layui-btn-sm layui-btn-disabled" id="button{{d.id}}" type="button" lay-event="disable">停用</button>
+                {{#  } }}
+                <div class="layui-btn-group">
+                    <button class="layui-btn layui-btn-sm layui-btn-danger" id="button{{d.id}}" type="button"  lay-event="delete">删除</button>
+                </div>
+            </script>
+        </div>
+        <script>
+            layui.config({
+                base: '__TMPL__/public/', //静态资源所在路径
+            }).extend({
+                index: 'lib/index' //主入口模块
+            }).use(['layer','table','form'],function () {
+                var layer = layui.layer;
+                var form = layui.form;
+                var table = layui.table;
+
+
+                //用户表格初始化
+                var dataTable = table.render({
+                    elem: '#dataTable'
+                    ,url: "{:url('Ware/getWareKeywordData')}" //数据接口
+                    ,page: true //开启分页
+                    ,cols: [[ //表头
+                        {field: 'keyword', title: '关键词'}
+                        ,{field: 'num', title: '挖掘数量'}
+                        ,{field: 'created_at', title: '创建时间'}
+                        ,{field: 'user_nickname', title: '创建人',width: 100}
+                        ,{fixed: 'right', title: '操作', align:'left', toolbar: '#options',width: 140}
+                    ]]
+                });
+
+
+
+
+
+
+                //监听行工具事件
+                table.on('tool(dataTable)', function(obj){
+                    var data = obj.data;
+                    if(obj.event === 'delete'){
+                        if(confirm('确认删除关键词')){
+                            to_disable(data.id,"{:url('Ware/delKeyword')}");
+                            layui.table.reload('dataTable');
+                        }
+                    }else if(obj.event === 'disable'){
+                        to_disable(data.id,"{:url('Ware/editStatus')}");
+                    }
+                });
+                var $ = layui.$, active = {
+                    reload: function(){
+                        var search = $('#search');
+                        //执行重载
+                        table.reload('dataTable', {
+                            page: {
+                                curr: 1 //重新从第 1 页开始
+                            },
+                            where: {
+                                keyword: search.val(),
+                                status:$('#select_status').val(),
+                                url:$("#search_url").val(),
+                            }
+                        });
+                    }
+                };
+                $('.search .layui-btn').on('click', function(){
+                    var type = $(this).data('type');
+                    active[type] ? active[type].call(this) : '';
+                });
+            });
+
+            function to_disable(id,url){
+                $.ajax({
+                    url:url,
+                    data:{id:id},
+                    type:'post',
+                    dataType:'json',
+                    success:function(res){
+                        if(res.status !== 1){
+                            layer.msg(res.message, {icon: 5});
+                            return false;
+                        }else{
+                            if(res.result_status === 1){
+                                $('#button'+id).removeClass("layui-btn-disabled");
+                                $('#button'+id).addClass("layui-btn-warm");
+                            }else{
+                                $('#button'+id).addClass("layui-btn-disabled");
+                                $('#button'+id).removeClass("layui-btn-warm");
+                            }
+                            layer.msg(res.message, {icon: 6});
+
+                        }
+                    },
+                });
+            }
+
+            function add(){
+                layer.open({
+                    title: '添加新的关键词'
+                    ,btn: ['提交'] //可以无限个按钮
+                    ,yes: function(index, layero){
+                        $.ajax({
+                            url:"{:url('ware/addPost')}",
+                            data:{'keyword':$('#keyword').val()},
+                            type:'post',
+                            dataType:'json',
+                            success:function(res){
+                                if(res.status != 1){
+                                    layer.msg(res.message, {icon: 5});
+                                    return false;
+                                }else{
+                                    var index =  layer.alert(res.message, {icon: 6},function () {
+                                        //关闭当前frame
+                                        parent.layer.close(index);
+                                        parent.layui.table.reload('dataTable');
+                                        // window.parent.location.reload();
+                                    });
+                                    return false;
+                                }
+                            },
+                            error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                layer.msg('网络错误！');
+                                return false;
+                            }
+                        });
+                    }
+                    ,content: '<div class="layui-form-item"><label for="keyword" class="layui-form-label"><span class="x-red">关键词</span></label><div class="layui-input-inline"><input type="text" id="keyword" name="keyword_name" value=""   autocomplete="off" class="layui-input" ></div></div>'
+                });
+            }
+
+        </script>
+    </div>
+</div>
+</body>
+</html>

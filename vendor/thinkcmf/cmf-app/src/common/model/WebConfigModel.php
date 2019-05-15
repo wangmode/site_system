@@ -21,6 +21,8 @@ class WebConfigModel extends Model
     const IS_WARE_YES   = 1;
 
 
+
+
     /**
      * 通过网站获取网站数据库配置
      * @param $id
