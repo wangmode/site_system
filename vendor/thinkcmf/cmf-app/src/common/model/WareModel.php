@@ -102,70 +102,101 @@ class WareModel
         $data['related_words'] =$keyword;
         $result_info = json_decode($this->httpRequest($url,$header,http_build_query($data)),true);
         if(!$result_info){
-            throw new Exception('接口请求失败!');
+            throw new Exception($keyword.'接口请求失败!');
         }
         return $result_info;
     }
 
 
-    public function to_export_title($keyword_id,$keyword,$page,$num,$data=[])
-    {
-        try {
-            $result = $this->get_title_list($keyword, $page);
-        } catch (Exception $e) {
-        }
-        if(isset($result['errcode']) && $result['errcode'] == 0){
-            foreach ($result['data']['data'] as $key=>$val){
-                $val['publish_time'] = date('Y-m-d H:i:s',strtotime($val['publish_time']));
-                $val['collect_time'] = date('Y-m-d H:i:s',strtotime($val['add_time']));
-                $val['add_time']  = date('Y-m-d H:i:s',time());
-                $data['warehouse'][]= $val;
-            }
-            $data['keywords']['num'] = $num = $num+count($result['data']['data']);
-            $data['keywords']['current_page'] = $result['data']['page_index'];
-            $data['keywords']['page_num'] = $result['data']['page_size'];
-            $data['keywords']['total'] = $result['data']['total'];
-            if($page < $result['data']['page_count']){
-                $page++;
-                return $this->get_title_list($keyword_id,$keyword,$page,$num,$data);
-            }else{
-                return $data;
-            }
-        }else{
-            //print_r($result);exit;
-            throw new Exception("接口请求错误！$result[errmsg]，关键词：".$keyword.'<br>');
-        }
-    }
+//    public function to_export_title($keyword_id,$keyword,$page,$num,$data=[])
+//    {
+//        try {
+//            $result = $this->get_title_list($keyword, $page);
+//        } catch (Exception $e) {
+//        }
+//        if(isset($result['errcode']) && $result['errcode'] == 0){
+//            foreach ($result['data']['data'] as $key=>$val){
+//                $val['publish_time'] = date('Y-m-d H:i:s',strtotime($val['publish_time']));
+//                $val['collect_time'] = date('Y-m-d H:i:s',strtotime($val['add_time']));
+//                $val['add_time']  = date('Y-m-d H:i:s',time());
+//                $data['warehouse'][]= $val;
+//            }
+//            $data['keywords']['num'] = $num = $num+count($result['data']['data']);
+//            $data['keywords']['current_page'] = $result['data']['page_index'];
+//            $data['keywords']['page_num'] = $result['data']['page_size'];
+//            $data['keywords']['total'] = $result['data']['total'];
+//            if($page < $result['data']['page_count']){
+//                $page++;
+//                return $this->get_title_list($keyword_id,$keyword,$page,$num,$data);
+//            }else{
+//                return $data;
+//            }
+//        }else{
+//            //print_r($result);exit;
+//            throw new Exception("接口请求错误！$result[errmsg]，关键词：".$keyword.'<br>');
+//        }
+//    }
 
 
-    public function to_export_title1($keyword,$page,$num)
+    /**
+     * @param $keyword_id
+     * @param $keyword
+     * @param $page
+     * @param $num
+     * @throws Exception
+     */
+    public function to_export_title($keyword_id,$keyword,$page,$num)
     {
-        $data['warehouse'] = [];
-        $data['keywords'] = [];
         do{
+            $data = [];
             $result = $this->get_title_list($keyword, $page);
             if(isset($result['errcode']) && $result['errcode'] == 0){
                 $result_data = $result['data']['data'];
                 $count = count($result_data);
-                $key = $count - ($num%$result['data']['page_size'])-1;
+                $key = $num-($page-1)*$result['data']['page_size'];
                 for ($i=$key;$i<=$count;$i++){
-                    $result_data[$key]['publish_time'] = date('Y-m-d H:i:s',strtotime($result_data[$key]['publish_time']));
-                    $result_data[$key]['collect_time'] = date('Y-m-d H:i:s',strtotime($result_data[$key]['add_time']));
-                    $result_data[$key]['add_time'] = date('Y-m-d H:i:s',time());
-                    $data['warehouse'][]= $result_data[$key];
+                    if(isset($result_data[$i]) && empty($result_data[$i]) === false){
+                        $info['keyword']        = $keyword;
+                        $info['keyword_id']     = $keyword_id;
+                        $info['url']            = $result_data[$i]['url'];
+                        $info['title']          = $result_data[$i]['title'];
+                        $info['data_id']        = $result_data[$i]['data_id'];
+                        $info['add_time']       = date('Y-m-d H:i:s',time());
+                        $info['author_name']    = $result_data[$i]['author_name'];
+                        $info['platform_name']  = $result_data[$i]['platform_name'];
+                        $info['collect_time']   = date('Y-m-d H:i:s',strtotime($result_data[$key]['add_time']));
+                        $info['publish_time']   = date('Y-m-d H:i:s',strtotime($result_data[$key]['publish_time']));
+                        $data[]= $info;
+                    }
                 }
-                $data['keywords']['num'] = $num = $num+$count;
-                $data['keywords']['current_page'] = $result['data']['page_index'];
-                $data['keywords']['total'] = $result['data']['total'];
+                $num = $num+count($data);
+                WarehouseModel::addWarehouseAll($data);
+                WareKeywordModel::updateKeywordInfo($keyword_id,$num, $result['data']['page_index'],$result['data']['total']);
                 $page++;
             }else{
-                echo "接口请求错误！$result[errmsg]，关键词：".$keyword.'<br>';
-                break;
+                throw new Exception("接口请求错误！$result[errmsg]，关键词：".$keyword.'<br>');
             }
-        }while($page < $result['data']['page_count']);
-        return $data;
+        }while($page <= $result['data']['page_count']);
     }
 
+
+    /**
+     * 抓取文章
+     */
+    public function get_Warehouse_list()
+    {
+        set_time_limit(0);
+        $ware_keyword_list = WareKeywordModel::getWareKeywordsData();
+        foreach ($ware_keyword_list as $key=>$value){
+            try{
+                $this->to_export_title($value['id'],$value['keyword'],$value['current_page'],$value['num']);
+                echo $value['keyword'].'文章抓取成功!<br>';
+            }catch (Exception $exception){
+                echo date('Y-m-d H:i:s',time()).$exception->getMessage().'<br>';
+            }
+//            sleep(1);
+        }
+    }
 
 
 }

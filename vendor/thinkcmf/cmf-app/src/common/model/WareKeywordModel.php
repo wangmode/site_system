@@ -95,7 +95,8 @@ class WareKeywordModel extends Model
     {
         return self::alias('w')
             ->where('status',self::STATUS_YES)
-            ->field(['w.id','w.keyword','w.num','w.current_page','w.page_num'])
+            ->field(['w.id','w.keyword','w.num','w.current_page'])
+            ->limit(0,50)
             ->order('w.id','desc')
             ->select();
     }
@@ -229,6 +230,25 @@ class WareKeywordModel extends Model
     {
         self::delKeyword($id);
         return self::updateKeywordApi();
+    }
+
+
+    /**
+     * @param $keyword_id
+     * @param $num
+     * @param $current_page
+     * @param $total
+     * @return WareKeywordModel
+     */
+    static public function updateKeywordInfo($keyword_id,$num,$current_page,$total)
+    {
+        return self::update([
+            'id'            =>  $keyword_id,
+            'num'           =>$num,
+            'total'         =>$total,
+            'current_page'  =>$current_page
+        ]);
+
     }
 
 
