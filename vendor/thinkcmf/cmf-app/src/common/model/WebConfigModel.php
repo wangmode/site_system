@@ -60,7 +60,7 @@ class WebConfigModel extends Model
             $where[] = ['w.is_ware','=',$is_ware];
         }
 
-        return self::alias('w')
+        return (new WebConfigModel)->alias('w')
             ->leftJoin('user u','w.admin_id = u.id')
             ->where($where)
             ->limit(($page-1)*$limit,$limit)
@@ -90,7 +90,7 @@ class WebConfigModel extends Model
         if(empty($is_ware) === false || $is_ware === 0 || $is_ware === '0'){
             $where[] = ['w.is_ware','=',$is_ware];
         }
-        return self::alias('w')
+        return (new WebConfigModel)->alias('w')
             ->leftJoin('user u','w.admin_id = u.id')
             ->where($where)
             ->count();
@@ -109,7 +109,7 @@ class WebConfigModel extends Model
      */
     static public function add($name,$url,$database,$hostname,$username,$password,$prefix)
     {
-        return self::insert([
+        return (new WebConfigModel)->insert([
             'url'           =>$url,
             'name'          =>$name,
             'prefix'        =>$prefix,
@@ -241,7 +241,7 @@ class WebConfigModel extends Model
      */
     static public function getWebConfigInfoById($id)
     {
-        return self::alias('w')
+        return (new WebConfigModel)->alias('w')
             ->leftJoin('user u','w.admin_id = u.id')
             ->where('w.id',$id)
             ->field(['w.*','u.user_nickname'])

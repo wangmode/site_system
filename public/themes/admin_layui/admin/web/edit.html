@@ -13,10 +13,17 @@
     <script type="text/javascript" src="__TMPL__/public/layui/layui.js"></script>
 </head>
 <body>
+<div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this"><a href="javascript:;">详细信息</a></li>
+            <li><a href="{:url('Web/keywordList',array('id'=>$info.id))}">关键词列表</a></li>
+        </ul>
+    </div>
+</div>
 <div class="x-body layui-anim layui-anim-up">
+
     <form method="post" class="layui-form">
-
-
         <div class="layui-form-item">
             <label for="name" class="layui-form-label">
                 <span class="x-red">网站名称</span>

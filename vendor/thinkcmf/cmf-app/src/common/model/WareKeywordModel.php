@@ -17,6 +17,8 @@ class WareKeywordModel extends Model
     const STATUS_YES = 1;
     const STATUS_NO  = 0;
 
+    const IS_WARE_NO    = 0;
+    const IS_WARE_YES   = 1;
 
 
     static public function getInfo()
@@ -36,7 +38,7 @@ class WareKeywordModel extends Model
             $info['keyword'] = $value;
             $data[] = $info;
         }
-        self::insertAll($data);
+        (new WareKeywordModel)->insertAll($data);
     }
 
 
@@ -60,11 +62,11 @@ class WareKeywordModel extends Model
         if(empty($status) === false || $status === 0 || $status === '0'){
             $where[] = ['w.status','=',$status];
         }
-        return self::alias('w')
+        return (new WareKeywordModel)->alias('w')
             ->leftJoin('user u','w.admin_id = u.id')
             ->where($where)
             ->limit(($page-1)*$limit,$limit)
-            ->field(['w.id','w.keyword','u.user_nickname','w.num','w.created_at','w.status'])
+            ->field(['w.id','w.keyword','u.user_nickname','w.num','w.created_at','w.status','w.is_ware'])
             ->order('w.id','desc')
             ->select();
     }
@@ -85,19 +87,24 @@ class WareKeywordModel extends Model
         if(empty($status) === false || $status === 0 || $status === '0'){
             $where[] = ['w.status','=',$status];
         }
-        return self::alias('w')
+        return (new WareKeywordModel)->alias('w')
             ->leftJoin('user u','w.admin_id = u.id')
             ->where($where)
             ->count();
     }
 
+    /**
+     * @return array|\PDOStatement|string|\think\Collection
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
     static public function getWareKeywordsData()
     {
-        return self::alias('w')
-            ->where('status',self::STATUS_YES)
-            ->field(['w.id','w.keyword','w.num','w.current_page'])
-            ->limit(0,50)
-            ->order('w.id','desc')
+        return self::where('status',self::STATUS_YES)
+            ->field(['id','keyword','num','current_page','is_ware'])
+            ->limit(0,10)
+            ->order(['order'=>'asc','id'=>'asc'])
             ->select();
     }
 
@@ -106,37 +113,36 @@ class WareKeywordModel extends Model
      */
     static public function getWareKeywordData()
     {
-        return implode("|",self::column('keyword'));
+        return implode("|",self::where('is_ware',self::IS_WARE_YES)->column('keyword'));
     }
+
 
     /**
      * @return bool
-     * @throws \think\Exception
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * @throws Exception
      */
     static public function updateKeywordApi()
     {
 //        return (new WareModel())->to_update_keyword(self::getWareKeywordData());
     }
 
-    
-
 
     /**
      * @param $keyword
+     * @param $order
      * @return int|string
      */
-    static public function addKeyword($keyword)
+    static public function addKeyword($keyword,$order)
     {
-        return self::insert([
+        return (new WareKeywordModel)->insert([
             'num'           =>0,
             'total'         =>0,
             'current_page'  =>1,
             'page_num'      =>10,
+            'order'         =>$order,
             'keyword'       =>$keyword,
             'status'        =>self::STATUS_YES,
+            'is_ware'       =>self::IS_WARE_YES,
             'admin_id'      =>cmf_get_current_admin_id(),
             'created_at'    =>date('Y-m-d H:i:s',time())
         ]);
@@ -154,18 +160,24 @@ class WareKeywordModel extends Model
     /**
      * @param $keyword
      * @return bool
-     * @throws \think\Exception
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * @throws Exception
      */
     static public function newAddKeyword($keyword)
     {
         if(self::getKeywrodCount() >= 200){
             throw new Exception('关键词个数不得大于200个');
         }
-        self::addKeyword($keyword);
+        $order = self::getOrderByDesc();
+        self::addKeyword($keyword,$order);
         return self::updateKeywordApi();
+    }
+
+    /**
+     * @return mixed
+     */
+    static public function getOrderByDesc()
+    {
+        return self::order('order','desc')->value('order');
     }
 
 
@@ -192,15 +204,70 @@ class WareKeywordModel extends Model
 
     /**
      * @param $id
+     * @return mixed
+     */
+    static public function getKeywrodIsWare($id)
+    {
+        return self::where('id',$id)->value('is_ware');
+    }
+
+    /**
+     * @param $id
      * @param $status
      * @return WareKeywordModel
      */
     static public function updateKeywrodStatus($id,$status)
     {
-        return self::update([
+        $info = [
             'id'        =>$id,
             'status'    =>$status
-        ]);
+        ];
+        if($status === self::STATUS_YES){
+            $info['order'] = self::getOrderByDesc();
+        }
+        return self::update($info);
+    }
+
+    /**
+     * @param $web_id
+     * @param $keyword
+     * @param $page
+     * @param $limit
+     * @return array|\PDOStatement|string|\think\Collection
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    static public function getNotWebKeywrodData($web_id,$keyword,$page,$limit)
+    {
+        $where = [];
+        if(empty($keyword) === false){
+            $keyword = trim($keyword);
+            $where[] = ['keyword','like',"%$keyword%"];
+        }
+        return (new WareKeywordModel)->whereNotIn('id',WebKeywordModel::getKeywordId($web_id))
+            ->where($where)
+            ->limit(($page-1)*$limit,$limit)
+            ->field(['id','keyword'])
+            ->select();
+    }
+
+    /**
+     * @param $web_id
+     * @param $keyword
+     * @return float|string
+     */
+    static public function getNotWebKeywrodCount($web_id,$keyword)
+    {
+        $where = [];
+        if(empty($keyword) === false){
+            $keyword = trim($keyword);
+            $where[] = ['keyword','like',"%$keyword%"];
+        }
+        return (new WareKeywordModel)->whereNotIn('id',WebKeywordModel::getKeywordId($web_id))
+            ->where($where)
+            ->field(['id','keyword'])
+            ->count();
     }
 
 
@@ -216,22 +283,56 @@ class WareKeywordModel extends Model
         return self::getKeywrodStatus($id);
     }
 
+    /**
+     * @param $id
+     * @return mixed
+     * @throws Exception
+     */
+    static public function editKeywordIsWare($id)
+    {
+        $is_ware = self::getKeywrodIsWare($id);
+        $is_ware = $is_ware == self::IS_WARE_YES ? self::IS_WARE_NO : self::IS_WARE_YES;
+        self::updateIsWare($id,$is_ware);
+        self::updateKeywordApi();
+        return self::getKeywrodIsWare($id);
+    }
 
     /**
      * @param $id
      * @return bool
      * @throws Exception
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
      * @throws \think\exception\PDOException
      */
     static public function deleteKeyword($id)
     {
         self::delKeyword($id);
+        WebKeywordModel::delByKeywrodId($id);
         return self::updateKeywordApi();
     }
 
+    /**
+     * @param $keyword_id
+     * @return \think\db\Query
+     */
+    static public function keywordInc($keyword_id)
+    {
+        return self::where('id',$keyword_id)->inc('order');
+    }
+
+    static public function updateIsWare($keyword_id,$is_ware)
+    {
+        return self::update(['id'=>$keyword_id,'is_ware'=>$is_ware]);
+    }
+
+    static public function updateIsWareYes($keyword_id)
+    {
+        return self::updateIsWare($keyword_id,self::IS_WARE_YES);
+    }
+
+    static public function updateIsWareNo($keyword_id)
+    {
+        return self::updateIsWare($keyword_id,self::IS_WARE_NO);
+    }
 
     /**
      * @param $keyword_id

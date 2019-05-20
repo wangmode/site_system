@@ -9,7 +9,9 @@
 namespace app\admin\controller;
 
 
+use app\common\model\WareKeywordModel;
 use app\common\model\WebConfigModel;
+use app\common\model\WebKeywordModel;
 use cmf\controller\AdminBaseController;
 use think\Exception;
 
@@ -18,6 +20,7 @@ class WebController extends AdminBaseController
 
     public function index()
     {
+
         return $this->fetch();
     }
 
@@ -31,7 +34,7 @@ class WebController extends AdminBaseController
         try{
             $data   = WebConfigModel::getWebListData($keyword,$status,$is_ware,$page,$limit);
             $count  = WebConfigModel::getWebListCount($keyword,$status,$is_ware);
-            return $this->returnListJson(self::CODE_OK, $count, $data, '获取代理客户列表成功');
+            return $this->returnListJson(self::CODE_OK, $count, $data, '获取网站配置列表成功');
         }catch (Exception $exception){
             return $this->returnListJson(self::CODE_FAIL, null, null, $exception->getMessage());
         }
@@ -114,4 +117,110 @@ class WebController extends AdminBaseController
             return $this->returnStatusJson(self::STATUS_FAIL,null,$exception->getMessage());
         }
     }
+
+    public function delWebConfig()
+    {
+
+        $id       = $this->request->param('id');
+        try{
+            if(empty($id) === true){
+                throw new Exception('非法访问');
+            }
+            WebKeywordModel::delByWebId($id);
+            WebConfigModel::delWebConfig($id);
+            return $this->returnStatusJson(self::STATUS_OK,null,'删除网站配置成功！');
+        }catch (Exception $exception){
+            return $this->returnStatusJson(self::STATUS_FAIL,null,$exception->getMessage());
+        }
+    }
+
+    public function keywordList()
+    {
+
+        $id       = $this->request->param('id');
+        try{
+            if(empty($id) === true){
+                throw new Exception('非法访问');
+            }
+            $this->assign('id',$id);
+            return $this->fetch();
+        }catch (Exception $exception){
+            $this->error($exception->getMessage());
+        }
+    }
+
+    public function getKeywordList()
+    {
+        $id         = $this->request->param('id');
+        $page       = $this->request->param('page');
+        $limit      = $this->request->param('limit');
+        $status     = $this->request->param('status');
+        $keyword    = $this->request->param('keyword');
+        try{
+            if(empty($id)){
+                throw new Exception('非法访问');
+            }
+            $data   = WebKeywordModel::getKeywordListDataByWebId($id,$keyword,$status,$page,$limit);
+            $count  = WebKeywordModel::getKeywordListCountByWebId($id,$keyword,$status);
+            return $this->returnListJson(self::CODE_OK, $count, $data, '获取网站关键词列表成功');
+        }catch (Exception $exception){
+            return $this->returnListJson(self::CODE_FAIL, null, null, $exception->getMessage());
+        }
+    }
+
+
+    public function delWebKeyword()
+    {
+        $web_id     = $this->request->param('web_id');
+        $keyword_id = $this->request->param('keyword_id');
+        try{
+            if(empty($web_id) || empty($keyword_id) ){
+                throw new Exception('非法访问');
+            }
+            WebKeywordModel::del($web_id,$keyword_id);
+            return $this->returnStatusJson(self::STATUS_OK,null,'删除网站关键词配置成功！');
+        }catch (Exception $exception){
+            return $this->returnStatusJson(self::STATUS_FAIL,null,$exception->getMessage());
+        }
+    }
+
+
+    /**
+     * @return \think\response\Json
+     */
+    public function getKeywordListData()
+    {
+        $page       = $this->request->param('page');
+        $limit      = $this->request->param('limit');
+        $web_id     = $this->request->param('web_id');
+        $keyword    = $this->request->param('keyword');
+
+        try{
+            if(empty($web_id)){
+                throw new Exception('非法访问');
+            }
+            $data   = WareKeywordModel::getNotWebKeywrodData($web_id,$keyword,$page,$limit);
+            $count  = WareKeywordModel::getNotWebKeywrodCount($web_id,$keyword);
+            return $this->returnListJson(self::CODE_OK, $count, $data, '获取网站关键词列表成功');
+        }catch (Exception $exception){
+            return $this->returnListJson(self::CODE_FAIL, null, null, $exception->getMessage());
+        }
+    }
+
+    public function addKeyword()
+    {
+        $web_id     = $this->request->param('web_id');
+        $keyword_id = $this->request->param('keyword_id');
+        try{
+            if(empty($web_id) || empty($keyword_id) ){
+                throw new Exception('非法访问');
+            }
+            WebKeywordModel::add($web_id,$keyword_id);
+            return $this->returnStatusJson(self::STATUS_OK,null,'添加网站关键词配置成功！');
+        }catch (Exception $exception){
+            return $this->returnStatusJson(self::STATUS_FAIL,null,$exception->getMessage());
+        }
+    }
+
+
 }

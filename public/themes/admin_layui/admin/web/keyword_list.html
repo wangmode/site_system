@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>网站配置列表</title>
+    <title>关键词列表</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
@@ -16,65 +16,50 @@
 <body>
 <div class="layui-fluid">
     <div class="layui-card">
+        <div class="layui-tab layui-tab-brief">
+            <ul class="layui-tab-title">
+                <li><a href="{:url('Web/edit',array('id'=>$id))}">详细信息</a></li>
+                <li class="layui-this"><a href="javascript:;">关键词列表</a></li>
+            </ul>
+        </div>
         <div class="layui-form layui-card-header layuiadmin-card-header-auto">
             <div class="layui-form-item">
                 <div class="layui-inline">
-                    <div class="layui-input-inline">
-                        <input type="text" name="keyword" id="search" placeholder="请输入查询名称" autocomplete="off" class="layui-input">
-                    </div>
-                </div>
-                <div class="layui-inline">
                     <select id="select_status" name="status" lay-filter="required">
-                        <option value="">请选择状态</option>
-                        <option value="0">禁用</option>
+                        <option value="">请选择抓取状态</option>
+                        <option value="0">停用</option>
                         <option value="1">正常</option>
                     </select>
                 </div>
                 <div class="layui-inline">
-                    <select id="select_is_ware" name="is_ware" lay-filter="required">
-                        <option value="">请选择挖掘状态</option>
-                        <option value="0">禁用</option>
-                        <option value="1">正常</option>
-                    </select>
+                    <div class="layui-input-inline">
+                        <input type="text" name="keywords" id="search" placeholder="请输入查询关键词" autocomplete="off" class="layui-input">
+                    </div>
                 </div>
                 <div class="layui-inline search">
                     <button class="layui-btn" data-type="reload" type="button">搜索</button>
                 </div>
             </div>
-        </div>
-        <div class="layui-card-header layuiadmin-card-header-auto" id="component-layer-list">
-            <div class="layadmin-layer-demo">
-                <button class="layui-btn layuiadmin-btn-list" onclick="window_open('添加内容','{:url(\'Web/add\')}','600','500')">新建网站配置</button>
+            <div class="layui-card-header layuiadmin-card-header-auto" id="component-layer-list">
+                <div class="layadmin-layer-demo">
+                    <button class="layui-btn layuiadmin-btn-list" id="add_keyword">添加关键词</button>
+                </div>
             </div>
         </div>
+
         <div class="layui-card-body">
             <table id="dataTable" lay-filter="dataTable"></table>
             <script type="text/html" id="status">
                 {{#  if(d.status === 0){ }}
-                禁用
+                停止
                 {{#  } else if(d.status === 1) { }}
                 正常
                 {{#  } else { }}
                 错误
                 {{#  } }}
             </script>
-            <script type="text/html" id="is_ware">
-                {{#  if(d.is_ware === 0){ }}
-                禁用
-                {{#  } else if(d.is_ware === 1) { }}
-                正常
-                {{#  } else { }}
-                错误
-                {{#  } }}
-            </script>
-            <script type="text/html" id="options">
-                <button class="layui-btn layui-btn-sm" type="button" lay-event="info">编辑</button>
-                {{#  if(d.is_ware === 1){ }}
-                <button class="layui-btn layui-btn-sm layui-btn-danger" id="button{{d.id}}" type="button"  lay-event="disable">停用</button>
-                {{#  } else { }}
-                <button class="layui-btn layui-btn-sm layui-btn-disabled" id="button{{d.id}}" type="button" lay-event="disable">停用</button>
-                {{#  } }}
 
+            <script type="text/html" id="options">
                 <div class="layui-btn-group">
                     <button class="layui-btn layui-btn-sm layui-btn-danger" id="button{{d.id}}" type="button"  lay-event="delete">删除</button>
                 </div>
@@ -85,38 +70,79 @@
                 base: '__TMPL__/public/', //静态资源所在路径
             }).extend({
                 index: 'lib/index' //主入口模块
-            }).use(['layer','table','form'],function () {
+            }).use(['index','layer','table','form','agentSelect'],function () {
+
+                // 'agentSelect','selectN','selectM'
                 var layer = layui.layer;
                 var form = layui.form;
                 var table = layui.table;
 
+                var tableSelect = layui.agentSelect;
+                tableSelect.render({
+                    elem: '#add_keyword', //定义输入框input对象
+                    searchKey: 'keyword',   //搜索输入框的name值 默认keyword
+                    searchPlaceholder: '搜索代理商', //搜索输入框的提示文字 默认关键词搜索
+                    table: {    //定义表格参数，与LAYUI的TABLE模块一致，只是无需再定义表格elem
+                        url:"{:url('Web/getKeywordListData',array('web_id'=>$id))}",
+                        cols: [[ //表头
+                            {field:'id', title:'选择',type:'checkbox',  templet: '#check', unresize: true,width:50},
+                            {field: 'keyword', title: '关键词'}
+                        ]]
+                    },
+                    done: function (elem, data) {
+                        var id=[];
+
+                        $.each(data.data,function(i,n)
+                        {
+                            id.push(n.id);
+                        });
+                        // console.log(id);
+                        if(id!=="" && id !== null && id!=='undefined'){
+                            $.ajax({
+                                url:"{:url('Web/addKeyword',array('web_id'=>$id))}",
+                                data:{'keyword_id':id},
+                                type:'post',
+                                dataType:'json',
+                                success:function(res){
+                                    if(res.status !== 1){
+                                        layer.msg(res.message, {icon: 5});
+                                        return false;
+                                    }else{
+                                        layer.msg(res.message, {icon: 6});
+                                        layui.table.reload('dataTable');
+                                    }
+                                },
+                            });
+                        }
+                    }
+
+                });
+
+
+
+
                 //用户表格初始化
                 var dataTable = table.render({
                     elem: '#dataTable'
-                    ,url: "{:url('Web/getWebListData')}" //数据接口
+                    ,url: "{:url('Web/getKeywordList',array('id'=>$id))}" //数据接口
                     ,page: true //开启分页
                     ,cols: [[ //表头
-                        {field: 'name', title: '网站名称'}
-                        ,{field: 'url', title: '网站地址'}
-                        ,{field: 'status', title: '状态',templet: '#status',width: 100}
+                        {field: 'id', title: 'ID'}
+                        ,{field: 'keyword', title: '关键词'}
+                        ,{field: 'status', title: '抓取状态',toolbar: '#status'}
                         ,{field: 'created_at', title: '创建时间'}
-                        ,{field: 'user_nickname', title: '创建人',width: 100}
-                        ,{fixed: 'right', title: '操作', align:'left', toolbar: '#options',width: 180}
+                        ,{fixed: 'right', title: '操作',width: 70, align:'left', toolbar: '#options'}
                     ]]
                 });
 
                 //监听行工具事件
                 table.on('tool(dataTable)', function(obj){
                     var data = obj.data;
-                    if(obj.event === 'info'){
-                        window_open('关键词详情','/admin/Web/edit/id/'+data.id+'.html','1600','800');
-                    }else if(obj.event === 'disable'){
-                        to_disable(data.id,"{:url('Web/editIsWare')}");
-                    }else if(obj.event === 'delete'){
-                        if(confirm('确认删除网站配置')){
+                    if(obj.event === 'delete'){
+                        if(confirm('确认删除网站关键词配置')){
                             $.ajax({
-                                url:"{:url('Web/delWebConfig')}",
-                                data:{id:data.id},
+                                url:"{:url('Web/delWebKeyword',array('web_id'=>$id))}",
+                                data:{'keyword_id':data.id},
                                 type:'post',
                                 dataType:'json',
                                 success:function(res){
@@ -144,7 +170,6 @@
                             where: {
                                 keyword: search.val(),
                                 status:$('#select_status').val(),
-                                is_ware:$('#select_is_ware').val(),
                                 url:$("#search_url").val(),
                             }
                         });
@@ -156,33 +181,13 @@
                 });
             });
 
-            function to_disable(id,url){
-                $.ajax({
-                    url:url,
-                    data:{id:id},
-                    type:'post',
-                    dataType:'json',
-                    success:function(res){
-                        if(res.status !== 1){
-                            layer.msg(res.message, {icon: 5});
-                            return false;
-                        }else{
-                            if(res.result_status === 1){
-                                $('#button'+id).removeClass("layui-btn-disabled");
-                                $('#button'+id).addClass("layui-btn-danger");
-                            }else{
-                                $('#button'+id).addClass("layui-btn-disabled");
-                                $('#button'+id).removeClass("layui-btn-danger");
-                            }
-                            layer.msg(res.message, {icon: 6});
-                            return false;
-                        }
-                    },
-                });
-            }
+
 
         </script>
     </div>
 </div>
 </body>
 </html>
+
+
+

@@ -48,6 +48,11 @@
                 {{#  } else { }}
                 <button class="layui-btn layui-btn-sm layui-btn-disabled" id="button{{d.id}}" type="button" lay-event="disable">停用</button>
                 {{#  } }}
+                {{#  if(d.is_ware === 1){ }}
+                <button class="layui-btn layui-btn-sm layui-btn-warm" id="button_is_ware{{d.id}}" type="button"  lay-event="is_ware">采集</button>
+                {{#  } else { }}
+                <button class="layui-btn layui-btn-sm layui-btn-disabled" id="button_is_ware{{d.id}}" type="button" lay-event="is_ware">采集</button>
+                {{#  } }}
                 <div class="layui-btn-group">
                     <button class="layui-btn layui-btn-sm layui-btn-danger" id="button{{d.id}}" type="button"  lay-event="delete">删除</button>
                 </div>
@@ -74,13 +79,9 @@
                         ,{field: 'num', title: '挖掘数量'}
                         ,{field: 'created_at', title: '创建时间'}
                         ,{field: 'user_nickname', title: '创建人',width: 100}
-                        ,{fixed: 'right', title: '操作', align:'left', toolbar: '#options',width: 140}
+                        ,{fixed: 'right', title: '操作', align:'left', toolbar: '#options',width: 185}
                     ]]
                 });
-
-
-
-
 
 
                 //监听行工具事件
@@ -93,6 +94,8 @@
                         }
                     }else if(obj.event === 'disable'){
                         to_disable(data.id,"{:url('Ware/editStatus')}");
+                    }else if(obj.event === 'is_ware'){
+                        to_is_ware(data.id,"{:url('Ware/editIsWare')}");
                     }
                 });
                 var $ = layui.$, active = {
@@ -134,6 +137,31 @@
                             }else{
                                 $('#button'+id).addClass("layui-btn-disabled");
                                 $('#button'+id).removeClass("layui-btn-warm");
+                            }
+                            layer.msg(res.message, {icon: 6});
+
+                        }
+                    },
+                });
+            }
+
+            function to_is_ware(id,url){
+                $.ajax({
+                    url:url,
+                    data:{id:id},
+                    type:'post',
+                    dataType:'json',
+                    success:function(res){
+                        if(res.status !== 1){
+                            layer.msg(res.message, {icon: 5});
+                            return false;
+                        }else{
+                            if(res.result_status === 1){
+                                $('#button_is_ware'+id).removeClass("layui-btn-disabled");
+                                $('#button_is_ware'+id).addClass("layui-btn-warm");
+                            }else{
+                                $('#button_is_ware'+id).addClass("layui-btn-disabled");
+                                $('#button_is_ware'+id).removeClass("layui-btn-warm");
                             }
                             layer.msg(res.message, {icon: 6});
 

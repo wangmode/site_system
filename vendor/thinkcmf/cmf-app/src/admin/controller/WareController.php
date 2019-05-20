@@ -9,7 +9,16 @@
 namespace app\admin\controller;
 
 
+use app\common\model\Article21Model;
+use app\common\model\ArticleData21Model;
+use app\common\model\CategoryModel;
+use app\common\model\CompanyModel;
+use app\common\model\NewsDataModel;
+use app\common\model\NewsModel;
+use app\common\model\WarehouseModel;
 use app\common\model\WareKeywordModel;
+use app\common\model\WareModel;
+use app\common\model\WebKeywordModel;
 use cmf\controller\AdminBaseController;
 use think\Exception;
 
@@ -19,6 +28,7 @@ class WareController extends AdminBaseController
     /**
      * 关键词列表
      * @return mixed
+     * @throws Exception
      */
     public function index()
     {
@@ -80,6 +90,28 @@ class WareController extends AdminBaseController
             return $this->returnStatusJson(self::STATUS_FAIL,null,$exception->getMessage());
         }
     }
+
+    /**
+     * 变更关键词采集状态
+     * @return \think\response\Json
+     */
+    public function editIsWare()
+    {
+        $id = $this->request->param('id');
+        try{
+            if(empty($id) === true){
+                throw new Exception('非法访问');
+            }
+            $status = WareKeywordModel::editKeywordIsWare($id);
+            return $this->returnStatusJson(self::STATUS_OK,$status,'变更关键词采集状态成功！');
+        }catch (Exception $exception){
+            return $this->returnStatusJson(self::STATUS_FAIL,null,$exception->getMessage());
+        }
+    }
+
+
+
+
 
     /**
      * 删除关键词

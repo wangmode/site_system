@@ -25,7 +25,13 @@ class WareModel
         $this->project_guid = '7f5c2e94-0b08-e911-8db2-c81f66ed8109';
     }
 
-    //更新监控关键词
+
+    /**
+     *   //更新监控关键词
+     * @param $keywords
+     * @return bool
+     * @throws Exception
+     */
     public function to_update_keyword($keywords){
         $url = 'http://apis.ciliuti.com/ciliuti/updateword';
         $this->header = ["Content-type:application/x-www-form-urlencoded","Authorization: APIKEY D95F1442A6734C59B705D88F9AC343BC"];
@@ -73,8 +79,13 @@ class WareModel
     }
 
 
-    //获取单条数据内容
-    function to_get_content($data_id){
+    /**
+     * //获取单条数据内容
+     * @param $data_id
+     * @return mixed
+     * @throws Exception
+     */
+    public function to_get_content($data_id){
         $url = 'http://apis.ciliuti.com/ciliuti/content';
         $header = ["Content-type:application/x-www-form-urlencoded","Authorization: APIKEY 218BD1743C004F7585C6D28E18AC5B2D"];
         $data['data_id'] = $data_id;
@@ -82,16 +93,23 @@ class WareModel
         $result = json_decode($this->httpRequest($url,$header,http_build_query($data)),true);
         if(!$result){
             throw new Exception('接口请求失败!');
-
         }
         if(isset($result['errcode']) && $result['errcode'] == 0){
             $content = $result['data'][0]['content'];
             return $content;
         }else{
+            echo '接口请求失败!';
             throw new Exception('单条数据内容获取失败');
         }
     }
 
+
+    /**
+     * @param $keyword
+     * @param $page
+     * @return mixed
+     * @throws Exception
+     */
     public function get_title_list($keyword,$page)
     {
         $url = 'http://apis.ciliuti.com/ciliuti/title';
@@ -107,35 +125,6 @@ class WareModel
         return $result_info;
     }
 
-
-//    public function to_export_title($keyword_id,$keyword,$page,$num,$data=[])
-//    {
-//        try {
-//            $result = $this->get_title_list($keyword, $page);
-//        } catch (Exception $e) {
-//        }
-//        if(isset($result['errcode']) && $result['errcode'] == 0){
-//            foreach ($result['data']['data'] as $key=>$val){
-//                $val['publish_time'] = date('Y-m-d H:i:s',strtotime($val['publish_time']));
-//                $val['collect_time'] = date('Y-m-d H:i:s',strtotime($val['add_time']));
-//                $val['add_time']  = date('Y-m-d H:i:s',time());
-//                $data['warehouse'][]= $val;
-//            }
-//            $data['keywords']['num'] = $num = $num+count($result['data']['data']);
-//            $data['keywords']['current_page'] = $result['data']['page_index'];
-//            $data['keywords']['page_num'] = $result['data']['page_size'];
-//            $data['keywords']['total'] = $result['data']['total'];
-//            if($page < $result['data']['page_count']){
-//                $page++;
-//                return $this->get_title_list($keyword_id,$keyword,$page,$num,$data);
-//            }else{
-//                return $data;
-//            }
-//        }else{
-//            //print_r($result);exit;
-//            throw new Exception("接口请求错误！$result[errmsg]，关键词：".$keyword.'<br>');
-//        }
-//    }
 
 
     /**
@@ -182,6 +171,9 @@ class WareModel
 
     /**
      * 抓取文章
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
      */
     public function get_Warehouse_list()
     {
@@ -189,12 +181,16 @@ class WareModel
         $ware_keyword_list = WareKeywordModel::getWareKeywordsData();
         foreach ($ware_keyword_list as $key=>$value){
             try{
+                WareKeywordModel::keywordInc($value['id']);
                 $this->to_export_title($value['id'],$value['keyword'],$value['current_page'],$value['num']);
+                if($value['is_ware'] === WareKeywordModel::IS_WARE_NO){
+                    WareKeywordModel::updateKeywrodStatus($value['id'],WareKeywordModel::STATUS_NO);
+                }
                 echo $value['keyword'].'文章抓取成功!<br>';
             }catch (Exception $exception){
                 echo date('Y-m-d H:i:s',time()).$exception->getMessage().'<br>';
             }
-//            sleep(1);
+
         }
     }
 
