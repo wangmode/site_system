@@ -19,9 +19,9 @@
         <div class="layui-tab layui-tab-brief">
             <ul class="layui-tab-title">
                 <li><a href="{:url('Web/edit',array('id'=>$id))}">详细信息</a></li>
-                <li class="layui-this"><a href="javascript:;">关键词列表</a></li>
+                <li><a href="{:url('Web/keywordList',array('id'=>$id))}">关键词列表</a></li>
                 <li><a href="{:url('Web/articlaList',array('id'=>$id))}">资讯列表</a></li>
-                <li><a href="{:url('Web/memberList',array('id'=>$id))}">客户管理</a></li>
+                <li class="layui-this"><a href="javascript:;">客户管理</a></li>
             </ul>
         </div>
         <div class="layui-form layui-card-header layuiadmin-card-header-auto">
@@ -42,11 +42,7 @@
                     <button class="layui-btn" data-type="reload" type="button">搜索</button>
                 </div>
             </div>
-            <div class="layui-card-header layuiadmin-card-header-auto" id="component-layer-list">
-                <div class="layadmin-layer-demo">
-                    <button class="layui-btn layuiadmin-btn-list" id="add_keyword">添加关键词</button>
-                </div>
-            </div>
+
         </div>
 
         <div class="layui-card-body">
@@ -91,32 +87,6 @@
                             {field: 'keyword', title: '关键词'}
                         ]]
                     },
-                    done: function (elem, data) {
-                        var id=[];
-
-                        $.each(data.data,function(i,n)
-                        {
-                            id.push(n.id);
-                        });
-                        // console.log(id);
-                        if(id!=="" && id !== null && id!=='undefined'){
-                            $.ajax({
-                                url:"{:url('Web/addKeyword',array('web_id'=>$id))}",
-                                data:{'keyword_id':id},
-                                type:'post',
-                                dataType:'json',
-                                success:function(res){
-                                    if(res.status !== 1){
-                                        layer.msg(res.message, {icon: 5});
-                                        return false;
-                                    }else{
-                                        layer.msg(res.message, {icon: 6});
-                                        layui.table.reload('dataTable');
-                                    }
-                                },
-                            });
-                        }
-                    }
 
                 });
 

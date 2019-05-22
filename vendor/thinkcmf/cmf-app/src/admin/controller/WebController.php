@@ -12,6 +12,7 @@ namespace app\admin\controller;
 use app\common\model\Article21Model;
 use app\common\model\ArticleData21Model;
 use app\common\model\CompanyModel;
+use app\common\model\memberModel;
 use app\common\model\WareKeywordModel;
 use app\common\model\WebConfigModel;
 use app\common\model\WebKeywordModel;
@@ -329,7 +330,41 @@ class WebController extends AdminBaseController
 
     }
 
+    /**
+     * 加载客户管理页面
+     * @return mixed
+     */
+    public function memberList()
+    {
+        $id       = $this->request->param('id');
+        try{
+            if(empty($id) === true){
+                throw new Exception('非法访问');
+            }
+            $this->assign('id',$id);
+            $this->assign('url',WebConfigModel::getUrl($id));
+            return $this->fetch();
+        }catch (Exception $exception){
+            $this->error($exception->getMessage());
+        }
+    }
 
+    public function getMemberListData()
+    {
+        $page       = $this->request->param('page',1);
+        $limit      = $this->request->param('limit',10);
+        $web_id     = $this->request->param('web_id',2);
+        try{
+            if(empty($web_id)){
+                throw new Exception('非法访问');
+            }
+            $member = new memberModel();
+            $member->modelInit($web_id);
+
+        }catch (Exception $exception){
+            return $this->returnStatusJson(self::STATUS_FAIL,null,$exception->getMessage());
+        }
+    }
 
 
 }
