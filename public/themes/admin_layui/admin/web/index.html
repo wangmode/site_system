@@ -68,6 +68,9 @@
                 {{#  } }}
             </script>
             <script type="text/html" id="options">
+                <div class="layui-btn-group"  >
+                    <a class="layui-btn layui-btn-sm" href="{{d.url}}" target="_blank" >查看详情</a>
+                </div>
                 <button class="layui-btn layui-btn-sm" type="button" lay-event="info">编辑</button>
                 {{#  if(d.is_ware === 1){ }}
                 <button class="layui-btn layui-btn-sm layui-btn-danger" id="button{{d.id}}" type="button"  lay-event="disable">停用</button>
@@ -101,7 +104,7 @@
                         ,{field: 'status', title: '状态',templet: '#status',width: 100}
                         ,{field: 'created_at', title: '创建时间'}
                         ,{field: 'user_nickname', title: '创建人',width: 100}
-                        ,{fixed: 'right', title: '操作', align:'left', toolbar: '#options',width: 180}
+                        ,{fixed: 'right', title: '操作', align:'left', toolbar: '#options',width: 255}
                     ]]
                 });
 
