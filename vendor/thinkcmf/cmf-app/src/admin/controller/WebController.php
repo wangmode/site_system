@@ -342,7 +342,6 @@ class WebController extends AdminBaseController
                 throw new Exception('非法访问');
             }
             $this->assign('id',$id);
-            $this->assign('url',WebConfigModel::getUrl($id));
             return $this->fetch();
         }catch (Exception $exception){
             $this->error($exception->getMessage());
