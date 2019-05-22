@@ -16,11 +16,10 @@ class NewsDataModel extends Model
     protected $pk = 'itemid';
 
     /**
-     * NewsDataModel constructor.
      * @param $web_id
      * @throws \think\Exception\DbException
      */
-    public function __construct($web_id)
+    public function modelInit($web_id)
     {
         $config = WebConfigModel::getConfigInfoById($web_id);
         $this->connection = [
@@ -43,8 +42,8 @@ class NewsDataModel extends Model
 //            "authcode" => 'FdW2IGlkQHrDcEbTK5',
             //#COOKIE_PREFIX#
         ];
-        parent::__construct();
     }
+
 
     /**
      * @param $itemid
@@ -57,5 +56,18 @@ class NewsDataModel extends Model
             'content'=>$content
         ]);
     }
+
+
+    /**
+     * @param $itemid
+     * @return int
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
+    public function delNews($itemid)
+    {
+        return self::where('itemid',$itemid)->delete();
+    }
+
 
 }

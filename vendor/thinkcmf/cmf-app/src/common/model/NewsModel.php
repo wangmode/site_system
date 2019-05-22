@@ -8,8 +8,6 @@
 
 namespace app\common\model;
 
-
-use think\Exception;
 use think\Exception\DbException;
 use think\Model;
 
@@ -32,11 +30,10 @@ class NewsModel extends Model
 
 
     /**
-     * NewsModel constructor.
      * @param $web_id
-     * @throws Exception
+     * @throws DbException
      */
-    public function __construct($web_id)
+    public function modelInit($web_id)
     {
         $config = WebConfigModel::getConfigInfoById($web_id);
         $this->connection = [
@@ -59,7 +56,6 @@ class NewsModel extends Model
 //            "authcode" => 'FdW2IGlkQHrDcEbTK5',
             //#COOKIE_PREFIX#
         ];
-        parent::__construct();
     }
 
 
@@ -89,5 +85,57 @@ class NewsModel extends Model
     {
         return self::whereIn('itemid',$itemids)->exp('linkurl',"concat('show.php?itemid=',`itemid`)")->update();
     }
+
+    /**
+     * @param $keyword
+     * @param $page
+     * @param $limit
+     * @return array|\PDOStatement|string|\think\Collection
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getNewsListData($keyword,$page,$limit)
+    {
+        $where= [];
+        if(empty($keyword) === false){
+            $keyword = trim($keyword);
+            $where[]=['title','like',"%$keyword%"];
+        }
+
+        return self::where($where)
+            ->order('itemid','desc')
+            ->limit(($page-1)*$limit,$limit)
+            ->field(['username','title','itemid','status','level','addtime','linkurl'])
+            ->select();
+    }
+
+
+    /**
+     * @param $keyword
+     * @return float|string
+     */
+    public function getNewsListCount($keyword)
+    {
+        $where= [];
+        if(empty($keywrod) === false){
+            $keyword = trim($keyword);
+            $where[]=['title','like',"%$keyword%"];
+        }
+        return self::where($where)
+            ->count();
+    }
+
+    /**
+     * @param $itemid
+     * @return int
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
+    public function delNews($itemid)
+    {
+        return self::where('itemid',$itemid)->delete();
+    }
+
 
 }
