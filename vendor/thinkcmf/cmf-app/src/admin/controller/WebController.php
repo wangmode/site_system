@@ -9,6 +9,9 @@
 namespace app\admin\controller;
 
 
+use app\common\model\Article21Model;
+use app\common\model\ArticleData21Model;
+use app\common\model\CompanyModel;
 use app\common\model\WareKeywordModel;
 use app\common\model\WebConfigModel;
 use app\common\model\WebKeywordModel;
@@ -18,12 +21,17 @@ use think\Exception;
 class WebController extends AdminBaseController
 {
 
+    /**
+     * @return mixed
+     */
     public function index()
     {
-
         return $this->fetch();
     }
 
+    /**
+     * @return \think\response\Json
+     */
     public function getWebListData()
     {
         $page       = $this->request->param('page');
@@ -40,11 +48,17 @@ class WebController extends AdminBaseController
         }
     }
 
+    /**
+     * @return mixed
+     */
     public function add()
     {
         return $this->fetch();
     }
 
+    /**
+     * @return \think\response\Json
+     */
     public function addPost()
     {
         $data       = $this->request->param();
@@ -60,6 +74,9 @@ class WebController extends AdminBaseController
         }
     }
 
+    /**
+     * @return mixed
+     */
     public function edit()
     {
         $id       = $this->request->param('id');
@@ -75,6 +92,9 @@ class WebController extends AdminBaseController
         }
     }
 
+    /**
+     * @return \think\response\Json
+     */
     public function editPost()
     {
         $data       = $this->request->param();
@@ -90,6 +110,9 @@ class WebController extends AdminBaseController
         }
     }
 
+    /**
+     * @return \think\response\Json
+     */
     public function editStatus()
     {
         $id       = $this->request->param('id');
@@ -104,6 +127,10 @@ class WebController extends AdminBaseController
         }
     }
 
+
+    /**
+     * @return \think\response\Json
+     */
     public function editIsWare()
     {
         $id       = $this->request->param('id');
@@ -118,6 +145,9 @@ class WebController extends AdminBaseController
         }
     }
 
+    /**
+     * @return \think\response\Json
+     */
     public function delWebConfig()
     {
 
@@ -134,6 +164,9 @@ class WebController extends AdminBaseController
         }
     }
 
+    /**
+     * @return mixed
+     */
     public function keywordList()
     {
 
@@ -149,6 +182,9 @@ class WebController extends AdminBaseController
         }
     }
 
+    /**
+     * @return \think\response\Json
+     */
     public function getKeywordList()
     {
         $id         = $this->request->param('id');
@@ -169,6 +205,9 @@ class WebController extends AdminBaseController
     }
 
 
+    /**
+     * @return \think\response\Json
+     */
     public function delWebKeyword()
     {
         $web_id     = $this->request->param('web_id');
@@ -194,7 +233,6 @@ class WebController extends AdminBaseController
         $limit      = $this->request->param('limit');
         $web_id     = $this->request->param('web_id');
         $keyword    = $this->request->param('keyword');
-
         try{
             if(empty($web_id)){
                 throw new Exception('非法访问');
@@ -207,6 +245,9 @@ class WebController extends AdminBaseController
         }
     }
 
+    /**
+     * @return \think\response\Json
+     */
     public function addKeyword()
     {
         $web_id     = $this->request->param('web_id');
@@ -221,6 +262,74 @@ class WebController extends AdminBaseController
             return $this->returnStatusJson(self::STATUS_FAIL,null,$exception->getMessage());
         }
     }
+
+    /**
+     * @return mixed
+     */
+    public function articlaList()
+    {
+        $id       = $this->request->param('id');
+        try{
+            if(empty($id) === true){
+                throw new Exception('非法访问');
+            }
+            $this->assign('id',$id);
+            $this->assign('url',WebConfigModel::getUrl($id));
+            return $this->fetch();
+        }catch (Exception $exception){
+            $this->error($exception->getMessage());
+        }
+    }
+
+    /**
+     * @return \think\response\Json
+     */
+    public function getArticlaListData()
+    {
+        $page       = $this->request->param('page',1);
+        $limit      = $this->request->param('limit',10);
+        $web_id     = $this->request->param('web_id',2);
+        $keyword    = $this->request->param('keyword');
+        try{
+            if(empty($web_id)){
+                throw new Exception('非法访问');
+            }
+
+            $Article = new Article21Model();
+            $Article->modelInit($web_id);
+            $data   = $Article->getArticleListData($keyword,$page,$limit);
+            $count  = $Article->getArticleListCount($keyword);
+            return $this->returnListJson(self::CODE_OK, $count, $data, '获取网站资讯列表成功');
+        }catch (Exception $exception){
+            return $this->returnListJson(self::CODE_FAIL, null, null, $exception->getMessage());
+        }
+    }
+
+    /**
+     * @return \think\response\Json
+     */
+    public function delArticla()
+    {
+        $web_id     = $this->request->param('web_id');
+        $itemid     = $this->request->param('itemid');
+        try{
+            if(empty($web_id) || empty($itemid) ){
+                throw new Exception('非法访问');
+            }
+            $Article = new Article21Model();
+            $Article->modelInit($web_id);
+            $Article->delArticle($itemid);
+            $ArticleData = new ArticleData21Model();
+            $ArticleData->modelInit($web_id);
+            $ArticleData->delArticle($itemid);
+            return $this->returnStatusJson(self::STATUS_OK,null,'删除网站资讯成功！');
+        }catch (Exception $exception){
+            return $this->returnStatusJson(self::STATUS_FAIL,null,$exception->getMessage());
+        }
+
+    }
+
+
 
 
 }

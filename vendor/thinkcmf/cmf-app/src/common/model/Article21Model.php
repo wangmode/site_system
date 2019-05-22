@@ -26,15 +26,17 @@ class Article21Model extends Model
     const STATUS_THREE  = 3; //正常
 
 
-    protected $pk = 'itemid';
+//    protected $pk = 'itemid';
+
+//    protected $connection = 'destoon';
+
+//    protected $table = 'destoon_article_21';
 
 
-    /**
-     * Article21Model constructor.
-     * @param $web_id
-     * @throws \think\Exception\DbException
-     */
-    public function __construct($web_id)
+
+
+
+    public function modelInit($web_id)
     {
         $config = WebConfigModel::getConfigInfoById($web_id);
         $this->connection = [
@@ -57,7 +59,7 @@ class Article21Model extends Model
 //            "authcode" => 'FdW2IGlkQHrDcEbTK5',
             //#COOKIE_PREFIX#
         ];
-        parent::__construct();
+        $this->table = "$config[prefix]article_21";
     }
 
 
@@ -99,6 +101,65 @@ class Article21Model extends Model
     public function updateLinkUrl($itemids)
     {
         return self::whereIn('itemid',$itemids)->exp('linkurl',"concat('show.php?itemid=',`itemid`)")->update();
+    }
+
+    /**
+     * @param $keyword
+     * @param $page
+     * @param $limit
+     * @return array|\PDOStatement|string|\think\Collection
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function getArticleListData($keyword,$page,$limit)
+    {
+        $where= [];
+        if(empty($keyword) === false){
+            $keyword = trim($keyword);
+            $where[]=['keyword|title','like',"%$keyword%"];
+        }
+
+        return self::where($where)
+            ->order('itemid','desc')
+            ->limit(($page-1)*$limit,$limit)
+            ->field(['username','title','keyword','itemid','status','level','addtime','linkurl'])
+            ->select();
+    }
+
+    /**
+     * @return array
+     */
+    public function getUsernameData()
+    {
+        return self::getPk();
+    }
+
+
+    /**
+     * @param $keyword
+     * @return float|string
+     */
+    public function getArticleListCount($keyword)
+    {
+        $where= [];
+        if(empty($keywrod) === false){
+            $keyword = trim($keyword);
+            $where[]=['keyword','like',"%$keyword%"];
+        }
+        return self::where($where)
+            ->count();
+    }
+
+    /**
+     * @param $itemid
+     * @return int
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
+    public function delArticle($itemid)
+    {
+        return self::where('itemid',$itemid)->delete();
     }
 
 

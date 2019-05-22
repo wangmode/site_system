@@ -17,11 +17,18 @@ use app\common\model\Article21Model;
 use app\common\model\ArticleData21Model;
 use app\common\model\NewsModel;
 use app\common\model\NewsDataModel;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\ModelNotFoundException;
 use think\Exception;
+use think\exception\DbException;
+
 class WareService
 {
     /**
      * 分发接口
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws ModelNotFoundException
      */
     static public function distribute()
     {
@@ -40,7 +47,9 @@ class WareService
                         $catid_arr = $category->getArticleCatId();
                         if(empty($username) === false){
                             $article = new Article21Model($v);
+                            $article->modelInit($v);
                             $article_data = new ArticleData21Model($v);
+                            $article_data->modelInit($v);
                             $article_id_array = [];
                             foreach ($warehouse as $item){
                                 try{

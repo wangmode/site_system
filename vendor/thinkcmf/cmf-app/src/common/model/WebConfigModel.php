@@ -69,6 +69,11 @@ class WebConfigModel extends Model
             ->select();
     }
 
+    static public function getUrl($web_id)
+    {
+        return self::where('id',$web_id)->value('url');
+    }
+
 
     /**
      * 网站配置列表数据条数

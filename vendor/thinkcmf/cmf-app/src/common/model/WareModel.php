@@ -144,22 +144,25 @@ class WareModel
                 $count = count($result_data);
                 $key = $num-($page-1)*$result['data']['page_size'];
                 for ($i=$key;$i<=$count;$i++){
+                    $info = [];
                     if(isset($result_data[$i]) && empty($result_data[$i]) === false){
-                        $info['keyword']        = $keyword;
-                        $info['keyword_id']     = $keyword_id;
-                        $info['url']            = $result_data[$i]['url'];
-                        $info['title']          = $result_data[$i]['title'];
-                        $info['data_id']        = $result_data[$i]['data_id'];
-                        $info['add_time']       = date('Y-m-d H:i:s',time());
-                        $info['author_name']    = $result_data[$i]['author_name'];
-                        $info['platform_name']  = $result_data[$i]['platform_name'];
-                        $info['collect_time']   = date('Y-m-d H:i:s',strtotime($result_data[$key]['add_time']));
-                        $info['publish_time']   = date('Y-m-d H:i:s',strtotime($result_data[$key]['publish_time']));
-                        $data[]= $info;
+                        if(mb_strlen($result_data[$i]['title']) <= 40){
+                            $info['keyword']        = $keyword;
+                            $info['keyword_id']     = $keyword_id;
+                            $info['url']            = $result_data[$i]['url'];
+                            $info['title']          = $result_data[$i]['title'];
+                            $info['data_id']        = $result_data[$i]['data_id'];
+                            $info['add_time']       = date('Y-m-d H:i:s',time());
+                            $info['author_name']    = $result_data[$i]['author_name'];
+                            $info['platform_name']  = $result_data[$i]['platform_name'];
+                            $info['collect_time']   = date('Y-m-d H:i:s',strtotime($result_data[$key]['add_time']));
+                            $info['publish_time']   = date('Y-m-d H:i:s',strtotime($result_data[$key]['publish_time']));
+                        }
                     }
+                    $data[]= $info;
                 }
                 $num = $num+count($data);
-                WarehouseModel::addWarehouseAll($data);
+                WarehouseModel::addWarehouseAll(array_filter($data));
                 WareKeywordModel::updateKeywordInfo($keyword_id,$num, $result['data']['page_index'],$result['data']['total']);
                 $page++;
             }else{

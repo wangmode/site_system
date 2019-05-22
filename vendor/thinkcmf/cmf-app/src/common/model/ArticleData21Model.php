@@ -17,11 +17,10 @@ class ArticleData21Model extends Model
 
 
     /**
-     * ArticleData21Model constructor.
      * @param $web_id
      * @throws \think\Exception\DbException
      */
-    public function __construct($web_id)
+    public function modelInit($web_id)
     {
         $config = WebConfigModel::getConfigInfoById($web_id);
         $this->connection = [
@@ -44,8 +43,9 @@ class ArticleData21Model extends Model
 //            "authcode" => 'FdW2IGlkQHrDcEbTK5',
             //#COOKIE_PREFIX#
         ];
-        parent::__construct();
+        $this->table = "$config[prefix]article_data_21";
     }
+
 
     /**
      * @param $itemid
@@ -57,6 +57,18 @@ class ArticleData21Model extends Model
             'itemid'=>$itemid,
             'content'=>$content
         ]);
+    }
+
+
+    /**
+     * @param $itemid
+     * @return int
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
+    public function delArticle($itemid)
+    {
+        return self::where('itemid',$itemid)->delete();
     }
 
 }

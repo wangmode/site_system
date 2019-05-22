@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>关键词列表</title>
+    <title>资讯列表</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
@@ -19,19 +19,12 @@
         <div class="layui-tab layui-tab-brief">
             <ul class="layui-tab-title">
                 <li><a href="{:url('Web/edit',array('id'=>$id))}">详细信息</a></li>
-                <li class="layui-this"><a href="javascript:;">关键词列表</a></li>
-                <li><a href="{:url('Web/articlaList',array('id'=>$id))}">资讯列表</a></li>
+                <li><a href="{:url('Web/keywordList',array('id'=>$id))}">关键词列表</a></li>
+                <li class="layui-this"><a href="javascript:;">资讯列表</a></li>
             </ul>
         </div>
         <div class="layui-form layui-card-header layuiadmin-card-header-auto">
             <div class="layui-form-item">
-                <div class="layui-inline">
-                    <select id="select_status" name="status" lay-filter="required">
-                        <option value="">请选择抓取状态</option>
-                        <option value="0">停用</option>
-                        <option value="1">正常</option>
-                    </select>
-                </div>
                 <div class="layui-inline">
                     <div class="layui-input-inline">
                         <input type="text" name="keywords" id="search" placeholder="请输入查询关键词" autocomplete="off" class="layui-input">
@@ -41,11 +34,6 @@
                     <button class="layui-btn" data-type="reload" type="button">搜索</button>
                 </div>
             </div>
-            <div class="layui-card-header layuiadmin-card-header-auto" id="component-layer-list">
-                <div class="layadmin-layer-demo">
-                    <button class="layui-btn layuiadmin-btn-list" id="add_keyword">添加关键词</button>
-                </div>
-            </div>
         </div>
 
         <div class="layui-card-body">
@@ -53,16 +41,23 @@
             <script type="text/html" id="status">
                 {{#  if(d.status === 0){ }}
                 停止
-                {{#  } else if(d.status === 1) { }}
+                {{#  } else if(d.status === 3) { }}
                 正常
                 {{#  } else { }}
                 错误
                 {{#  } }}
             </script>
+            <script type="text/html" id="date">
+                {{ time2date(d.addtime) }}
+            </script>
+
 
             <script type="text/html" id="options">
                 <div class="layui-btn-group">
-                    <button class="layui-btn layui-btn-sm layui-btn-danger" id="button{{d.id}}" type="button"  lay-event="delete">删除</button>
+                    <a class="layui-btn layui-btn-sm" href="{$url}/{{d.linkurl}}" target="_blank" >查看详情</a>
+                </div>
+                <div class="layui-btn-group">
+                    <button class="layui-btn layui-btn-sm layui-btn-danger" id="button{{d.itemid}}" type="button"  lay-event="delete">删除</button>
                 </div>
             </script>
         </div>
@@ -78,61 +73,20 @@
                 var form = layui.form;
                 var table = layui.table;
 
-                var tableSelect = layui.agentSelect;
-                tableSelect.render({
-                    elem: '#add_keyword', //定义输入框input对象
-                    searchKey: 'keyword',   //搜索输入框的name值 默认keyword
-                    searchPlaceholder: '搜索代理商', //搜索输入框的提示文字 默认关键词搜索
-                    table: {    //定义表格参数，与LAYUI的TABLE模块一致，只是无需再定义表格elem
-                        url:"{:url('Web/getKeywordListData',array('web_id'=>$id))}",
-                        cols: [[ //表头
-                            {field:'id', title:'选择',type:'checkbox',  templet: '#check', unresize: true,width:50},
-                            {field: 'keyword', title: '关键词'}
-                        ]]
-                    },
-                    done: function (elem, data) {
-                        var id=[];
-
-                        $.each(data.data,function(i,n)
-                        {
-                            id.push(n.id);
-                        });
-                        // console.log(id);
-                        if(id!=="" && id !== null && id!=='undefined'){
-                            $.ajax({
-                                url:"{:url('Web/addKeyword',array('web_id'=>$id))}",
-                                data:{'keyword_id':id},
-                                type:'post',
-                                dataType:'json',
-                                success:function(res){
-                                    if(res.status !== 1){
-                                        layer.msg(res.message, {icon: 5});
-                                        return false;
-                                    }else{
-                                        layer.msg(res.message, {icon: 6});
-                                        layui.table.reload('dataTable');
-                                    }
-                                },
-                            });
-                        }
-                    }
-
-                });
-
-
 
 
                 //用户表格初始化
                 var dataTable = table.render({
                     elem: '#dataTable'
-                    ,url: "{:url('Web/getKeywordList',array('id'=>$id))}" //数据接口
+                    ,url: "{:url('Web/getArticlaListData',array('web_id'=>$id))}" //数据接口
                     ,page: true //开启分页
                     ,cols: [[ //表头
-                        {field: 'id', title: 'ID'}
+                        {field: 'title', title: '关键词'}
                         ,{field: 'keyword', title: '关键词'}
-                        ,{field: 'status', title: '抓取状态',toolbar: '#status'}
-                        ,{field: 'created_at', title: '创建时间'}
-                        ,{fixed: 'right', title: '操作',width: 70, align:'left', toolbar: '#options'}
+                        ,{field: 'username', title: ' 发布人'}
+                        ,{field: 'status', title: '状态',toolbar: '#status'}
+                        ,{field: 'addtime', title: '创建时间',toolbar: '#date'}
+                        ,{fixed: 'right', title: '操作',width: 160, align:'left', toolbar: '#options'}
                     ]]
                 });
 
@@ -140,10 +94,10 @@
                 table.on('tool(dataTable)', function(obj){
                     var data = obj.data;
                     if(obj.event === 'delete'){
-                        if(confirm('确认删除网站关键词配置')){
+                        if(confirm('确认删除网站资讯')){
                             $.ajax({
-                                url:"{:url('Web/delWebKeyword',array('web_id'=>$id))}",
-                                data:{'keyword_id':data.id},
+                                url:"{:url('Web/delArticla',array('web_id'=>$id))}",
+                                data:{'itemid':data.itemid},
                                 type:'post',
                                 dataType:'json',
                                 success:function(res){
@@ -170,7 +124,6 @@
                             },
                             where: {
                                 keyword: search.val(),
-                                status:$('#select_status').val(),
                                 url:$("#search_url").val(),
                             }
                         });
@@ -183,6 +136,11 @@
             });
 
 
+
+            function time2date(t){
+                var t1 = parseInt(t + '000');
+                return layui.util.toDateString(t1);
+            }
 
         </script>
     </div>
