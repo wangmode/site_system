@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: Administrator
  * Date: 2019/5/22 0022
- * Time: 11:09
+ * Time: 14:20
  */
 
 namespace app\common\model;
@@ -11,10 +11,16 @@ namespace app\common\model;
 
 use think\Model;
 
-class memberModel extends Model
+class CompanyDataModel extends Model
 {
+    protected $pk = 'userid';
 
-    public function modelInit($web_id)
+    /**
+     * CompanyModel constructor.
+     * @param $web_id
+     * @throws DbException
+     */
+    public function __construct($web_id)
     {
         $config = WebConfigModel::getConfigInfoById($web_id);
         $this->connection = [
@@ -37,17 +43,11 @@ class memberModel extends Model
 //            "authcode" => 'FdW2IGlkQHrDcEbTK5',
             //#COOKIE_PREFIX#
         ];
-        $this->table = "$config[prefix]article_21";
+        parent::__construct();
     }
 
-    public function memberList($page,$limit)
+    public function delCompanData($userid)
     {
-        return self::alias("m")
-            ->leftJoin("member_group g","m.groupid = g.groupid")
-            ->leftJoin("company c","m.userid = c.userid")
-            ->limit(($page-1)*$limit,$limit)
-            ->order('m.userid','desc')
-            ->field(['m.username','m.passport','c.company','g.groupname','m.truename','m.mobile','c.level','c.vip',''])
-            ->select();
+        return self::where(['userid'=>$userid])->delete();
     }
 }

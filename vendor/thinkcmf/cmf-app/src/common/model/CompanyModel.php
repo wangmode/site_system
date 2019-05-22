@@ -57,4 +57,16 @@ class CompanyModel extends Model
         return self::column('username');
     }
 
+    /**
+     * 删除公司
+     * @param $userid
+     * @return int
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
+    public function delCompany($userid)
+    {
+        return self::where(['userid'=>$userid])->delete();
+    }
+
 }

@@ -20,8 +20,8 @@
             <ul class="layui-tab-title">
                 <li><a href="{:url('Web/edit',array('id'=>$id))}">详细信息</a></li>
                 <li><a href="{:url('Web/keywordList',array('id'=>$id))}">关键词列表</a></li>
-                <li class="layui-this"><a href="javascript:;">资讯列表</a></li>
-                <li><a href="{:url('Web/newsList',array('id'=>$id))}">新闻列表</a></li>
+                <li><a href="{:url('Web/articlaList',array('id'=>$id))}">资讯列表</a></li>
+                <li class="layui-this"><a href="javascript:;">新闻列表</a></li>
                 <li><a href="{:url('Web/memberList',array('id'=>$id))}">客户管理</a></li>
             </ul>
         </div>
@@ -80,11 +80,10 @@
                 //用户表格初始化
                 var dataTable = table.render({
                     elem: '#dataTable'
-                    ,url: "{:url('Web/getArticlaListData',array('web_id'=>$id))}" //数据接口
+                    ,url: "{:url('Web/getNewsListData',array('web_id'=>$id))}" //数据接口
                     ,page: true //开启分页
                     ,cols: [[ //表头
                         {field: 'title', title: '标题'}
-                        ,{field: 'keyword', title: '关键词'}
                         ,{field: 'username', title: ' 发布人'}
                         ,{field: 'status', title: '状态',toolbar: '#status'}
                         ,{field: 'addtime', title: '创建时间',toolbar: '#date'}
@@ -96,9 +95,9 @@
                 table.on('tool(dataTable)', function(obj){
                     var data = obj.data;
                     if(obj.event === 'delete'){
-                        if(confirm('确认删除网站资讯')){
+                        if(confirm('确认删除网站新闻')){
                             $.ajax({
-                                url:"{:url('Web/delArticla',array('web_id'=>$id))}",
+                                url:"{:url('Web/delNews',array('web_id'=>$id))}",
                                 data:{'itemid':data.itemid},
                                 type:'post',
                                 dataType:'json',

@@ -2,8 +2,8 @@
 /**
  * Created by PhpStorm.
  * User: Administrator
- * Date: 2019/5/18
- * Time: 16:48
+ * Date: 2019/5/22 0022
+ * Time: 14:16
  */
 
 namespace app\common\model;
@@ -11,15 +11,16 @@ namespace app\common\model;
 
 use think\Model;
 
-class NewsDataModel extends Model
+class MemberMiscModel extends Model
 {
-    protected $pk = 'itemid';
+    protected $pk = 'userid';
 
     /**
+     * CompanyModel constructor.
      * @param $web_id
-     * @throws \think\Exception\DbException
+     * @throws DbException
      */
-    public function modelInit($web_id)
+    public function __construct($web_id)
     {
         $config = WebConfigModel::getConfigInfoById($web_id);
         $this->connection = [
@@ -42,32 +43,11 @@ class NewsDataModel extends Model
 //            "authcode" => 'FdW2IGlkQHrDcEbTK5',
             //#COOKIE_PREFIX#
         ];
+        parent::__construct();
     }
 
-
-    /**
-     * @param $itemid
-     * @param $content
-     */
-    public function addNewsData($itemid,$content)
+    public function delMemberMisc($userid)
     {
-        self::insert([
-            'itemid'=>$itemid,
-            'content'=>$content
-        ]);
+        return self::where(['userid'=>$userid])->delete();
     }
-
-
-    /**
-     * @param $itemid
-     * @return int
-     * @throws \think\Exception
-     * @throws \think\exception\PDOException
-     */
-    public function delNews($itemid)
-    {
-        return self::where('itemid',$itemid)->delete();
-    }
-
-
 }

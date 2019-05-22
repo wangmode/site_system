@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>关键词列表</title>
+    <title>账户列表</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
@@ -21,6 +21,7 @@
                 <li><a href="{:url('Web/edit',array('id'=>$id))}">详细信息</a></li>
                 <li><a href="{:url('Web/keywordList',array('id'=>$id))}">关键词列表</a></li>
                 <li><a href="{:url('Web/articlaList',array('id'=>$id))}">资讯列表</a></li>
+                <li><a href="{:url('Web/newsList',array('id'=>$id))}">新闻列表</a></li>
                 <li class="layui-this"><a href="javascript:;">客户管理</a></li>
             </ul>
         </div>
@@ -28,38 +29,30 @@
             <div class="layui-form-item">
                 <div class="layui-inline">
                     <select id="select_status" name="status" lay-filter="required">
-                        <option value="">请选择抓取状态</option>
-                        <option value="0">停用</option>
-                        <option value="1">正常</option>
+                        <option value="">请选择账户类型</option>
+                        <volist name="groupname" id="item">
+                            <option value="{$item.groupid}">{$item.groupname}</option>
+                        </volist>
                     </select>
                 </div>
                 <div class="layui-inline">
                     <div class="layui-input-inline">
-                        <input type="text" name="keywords" id="search" placeholder="请输入查询关键词" autocomplete="off" class="layui-input">
+                        <input type="text" name="keywords" id="search" placeholder="输入要查询账号或公司名称" autocomplete="off" class="layui-input">
                     </div>
                 </div>
                 <div class="layui-inline search">
                     <button class="layui-btn" data-type="reload" type="button">搜索</button>
                 </div>
             </div>
-
         </div>
 
         <div class="layui-card-body">
             <table id="dataTable" lay-filter="dataTable"></table>
-            <script type="text/html" id="status">
-                {{#  if(d.status === 0){ }}
-                停止
-                {{#  } else if(d.status === 1) { }}
-                正常
-                {{#  } else { }}
-                错误
-                {{#  } }}
-            </script>
-
             <script type="text/html" id="options">
-                <div class="layui-btn-group">
-                    <button class="layui-btn layui-btn-sm layui-btn-danger" id="button{{d.id}}" type="button"  lay-event="delete">删除</button>
+                <div class="layui-table-cell laytable-cell-1-0-10">
+                    <a class="layui-btn layui-btn-xs" href="{{d.linkurl}}" target="_blank" >公司首页</a>
+                    <button class="layui-btn layui-btn-xs layui-btn-normal" id="" type="button"  lay-event="edit">查看详情</button>
+                    <button class="layui-btn layui-btn-xs layui-btn-danger" id="button{{d.id}}" type="button"  lay-event="delete">删除</button>
                 </div>
             </script>
         </div>
@@ -96,14 +89,18 @@
                 //用户表格初始化
                 var dataTable = table.render({
                     elem: '#dataTable'
-                    ,url: "{:url('Web/getKeywordList',array('id'=>$id))}" //数据接口
+                    ,url: "{:url('Web/getMemberListData',array('web_id'=>$id))}" //数据接口
                     ,page: true //开启分页
                     ,cols: [[ //表头
-                        {field: 'id', title: 'ID'}
-                        ,{field: 'keyword', title: '关键词'}
-                        ,{field: 'status', title: '抓取状态',toolbar: '#status'}
-                        ,{field: 'created_at', title: '创建时间'}
-                        ,{fixed: 'right', title: '操作',width: 70, align:'left', toolbar: '#options'}
+                        {field: 'username', title: '账号'}
+                        ,{field: 'passport', title: '昵称'}
+                        ,{field: 'company', title: '公司名称'}
+                        ,{field: 'truename', title: '联系人'}
+                        ,{field: 'mobile', title: '联系电话'}
+                        ,{field: 'groupname', title: '账户类型'}
+                        ,{field: 'level', title: '等级'}
+                        ,{field: 'vip', title: 'vip等级'}
+                        ,{fixed: 'right', title: '操作',width: 230, align:'left', toolbar: '#options'}
                     ]]
                 });
 
@@ -111,10 +108,10 @@
                 table.on('tool(dataTable)', function(obj){
                     var data = obj.data;
                     if(obj.event === 'delete'){
-                        if(confirm('确认删除网站关键词配置')){
+                        if(confirm('确认删除此账户吗')){
                             $.ajax({
-                                url:"{:url('Web/delWebKeyword',array('web_id'=>$id))}",
-                                data:{'keyword_id':data.id},
+                                url:"{:url('Web/delMember',array('web_id'=>$id))}",
+                                data:{'userid':data.userid},
                                 type:'post',
                                 dataType:'json',
                                 success:function(res){
@@ -129,6 +126,8 @@
                             });
 
                         }
+                    }else if(obj.event === 'edit'){
+                        window_open('公司详情','/admin/Web/memberEdit/userid/'+data.userid+'/web_id/'+{$id}+'.html','800','600');
                     }
                 });
                 var $ = layui.$, active = {

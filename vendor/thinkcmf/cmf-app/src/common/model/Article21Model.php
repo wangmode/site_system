@@ -127,14 +127,6 @@ class Article21Model extends Model
             ->select();
     }
 
-    /**
-     * @return array
-     */
-    public function getUsernameData()
-    {
-        return self::getPk();
-    }
-
 
     /**
      * @param $keyword
@@ -145,7 +137,7 @@ class Article21Model extends Model
         $where= [];
         if(empty($keywrod) === false){
             $keyword = trim($keyword);
-            $where[]=['keyword','like',"%$keyword%"];
+            $where[]=['keyword|title','like',"%$keyword%"];
         }
         return self::where($where)
             ->count();

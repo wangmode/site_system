@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>客户详情</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="stylesheet" href="__TMPL__/public/layui/css/modules/layer/default/layer.css" id="layuicss-layer"   media="all">
+    <link rel="stylesheet" href="__TMPL__/public/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="__TMPL__/public/style/admin.css" media="all">
+    <script type="text/javascript" src="__TMPL__/public/js/jquery.min.js"></script>
+    <script type="text/javascript" src="__TMPL__/public/layui/layui.js"></script>
+</head>
+<body>
+<div class="x-body layui-anim layui-anim-up">
+    <div class="layui-card layui-fluid">
+        <table class="layui-table"  >
+            <colgroup>
+                <col width="130">
+                <col>
+            </colgroup>
+            <tbody>
+            <tr>
+                <td>账号</td>
+                <td colspan="3">{$info.username}</td>
+            </tr>
+            <tr>
+                <td>昵称</td>
+                <td colspan="3">{$info.passport}</td>
+            </tr>
+            <tr>
+                <td>公司名称</td>
+                <td colspan="3">{$info.company}</td>
+            </tr>
+            <tr>
+                <td>联系人</td>
+                <td colspan="3">{$info.truename}</td>
+            </tr>
+            <tr>
+                <td>联系人电话</td>
+                <td colspan="3">{$info.mobile}</td>
+            </tr>
+            <tr>
+                <td>账户余额</td>
+                <td colspan="3">{$info.money}</td>
+            </tr>
+            <tr>
+                <td>公司分类</td>
+                <td colspan="3">{$info.groupname}</td>
+            </tr>
+            <tr>
+                <td>公司类型</td>
+                <td colspan="3">{$info.type}</td>
+            </tr>
+            <tr>
+                <td>账户等级</td>
+                <td colspan="3">{$info.level}</td>
+            </tr>
+            <tr>
+                <td>VIP等级</td>
+                <td colspan="3">{$info.vip}</td>
+            </tr>
+            <tr>
+                <td>注册时间</td>
+                <td colspan="3">{$info.regtime}</td>
+            </tr>
+            <tr>
+                <td>公司链接</td>
+                <td colspan="3">{$info.linkurl}</td>
+            </tr>
+            <tr height="36px;">
+                <td>公司简介</td>
+                <td colspan="3">{$info.content}</td>
+            </tr>
+
+            </tbody>
+        </table>
+        <div class="layui-col-md1 layui-col-md-offset1">
+            <div class="grid-demo grid-demo-bg1"><button  type="button" class="layui-btn" id="close">关闭</button></div>
+        </div>
+    </div>
+</div>
+<style>
+    html{background-color: #fff;color: black;margin-top: 20px;}
+</style>
+<script>
+    layui.config({
+        base: '__TMPL__/public/', //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index', 'form','selectN','selectM'], function(){
+        var $ = layui.$
+            ,form = layui.form,
+            selectN = layui.selectN;
+
+        $("#close").click(function () {
+            // 获得frame索引
+            var index = parent.layer.getFrameIndex(window.name);
+            //关闭当前frame
+            parent.layer.close(index);
+            parent.layui.table.reload('dataTable');
+        })
+
+    });
+
+
+</script>
+</body>
+</html>

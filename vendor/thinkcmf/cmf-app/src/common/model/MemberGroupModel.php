@@ -2,8 +2,8 @@
 /**
  * Created by PhpStorm.
  * User: Administrator
- * Date: 2019/5/18
- * Time: 16:48
+ * Date: 2019/5/22 0022
+ * Time: 13:42
  */
 
 namespace app\common\model;
@@ -11,14 +11,8 @@ namespace app\common\model;
 
 use think\Model;
 
-class NewsDataModel extends Model
+class MemberGroupModel extends Model
 {
-    protected $pk = 'itemid';
-
-    /**
-     * @param $web_id
-     * @throws \think\Exception\DbException
-     */
     public function modelInit($web_id)
     {
         $config = WebConfigModel::getConfigInfoById($web_id);
@@ -44,30 +38,15 @@ class NewsDataModel extends Model
         ];
     }
 
-
     /**
-     * @param $itemid
-     * @param $content
+     * 获取分类名称
+     * @return array|\PDOStatement|string|\think\Collection
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
      */
-    public function addNewsData($itemid,$content)
+    public function groupName()
     {
-        self::insert([
-            'itemid'=>$itemid,
-            'content'=>$content
-        ]);
+        return self::field(['groupid','groupname'])->select();
     }
-
-
-    /**
-     * @param $itemid
-     * @return int
-     * @throws \think\Exception
-     * @throws \think\exception\PDOException
-     */
-    public function delNews($itemid)
-    {
-        return self::where('itemid',$itemid)->delete();
-    }
-
-
 }
