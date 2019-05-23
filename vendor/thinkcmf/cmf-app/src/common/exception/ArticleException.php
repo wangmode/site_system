@@ -1,4 +1,5 @@
 <?php
+namespace  app\common\Exception;
 /**
  * Created by PhpStorm.
  * User: Administrator

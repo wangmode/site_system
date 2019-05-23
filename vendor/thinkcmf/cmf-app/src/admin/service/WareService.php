@@ -22,7 +22,7 @@ use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
 use think\Exception;
 use think\exception\DbException;
-use ArticleException;
+use app\common\Exception\ArticleException;
 
 class WareService
 {
@@ -61,21 +61,18 @@ class WareService
                                     shuffle($catid_arr);
                                     $article_id = $article->addArticle($item['keyword'],$catid_arr[0],$item['title'],$item['author_name'],$item['url'],$item['keyword'],'',$username[0],$item['platform_name']);
                                     $article->updateLinkUrl($article_id);
-                                    $content = $ware->to_get_content(44790798);
-                                    usleep(10);
-                                    $article_data->addArticaleData($article_id,$content,44790798);
-                                    WarehouseModel::delByDataId(44790798);
+
+                                    $content = $ware->to_get_content($item['data_id']);
+                                    usleep(100);
+                                    $article_data->addArticaleData($article_id,$content,$item['data_id']);
+                                    WarehouseModel::delByDataId($item['data_id']);
                                 }catch (ArticleException $exception){
                                     $data = $exception->getArticleId();
                                     if(empty($data) === false){
-                                        $article_data->delArticle($data['itemid']);
-                                        WarehouseModel::delByDataId($item['data_id']);
+                                        $article->delArticle($data['itemid']);
+                                        WarehouseModel::delByDataId($data['data_id']);
                                     }
                                     echo  $exception->getMessage();
-                                    die;
-                                    continue;
-                                }catch (Exception $e){
-                                    echo  $e->getMessage();
                                     continue;
                                 }
                             }

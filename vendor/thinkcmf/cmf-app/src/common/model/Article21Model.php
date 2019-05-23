@@ -95,8 +95,10 @@ class Article21Model extends Model
 
 
     /**
-     * @param $itemids
-     * @return Article21Model
+     * @param $itemid
+     * @return int|string
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
      */
     public function updateLinkUrl($itemid)
     {
