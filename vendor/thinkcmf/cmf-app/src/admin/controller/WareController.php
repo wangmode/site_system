@@ -26,9 +26,8 @@ class WareController extends AdminBaseController
 {
 
     /**
-     * 关键词列表
+     *  关键词列表
      * @return mixed
-     * @throws Exception
      */
     public function index()
     {

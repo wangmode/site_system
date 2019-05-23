@@ -312,11 +312,12 @@ class WareKeywordModel extends Model
 
     /**
      * @param $keyword_id
-     * @return \think\db\Query
+     * @return int|true
+     * @throws Exception
      */
     static public function keywordInc($keyword_id)
     {
-        return self::where('id',$keyword_id)->inc('order');
+        return self::where('id',$keyword_id)->setInc('order');
     }
 
     static public function updateIsWare($keyword_id,$is_ware)
