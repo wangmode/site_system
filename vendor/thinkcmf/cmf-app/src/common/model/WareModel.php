@@ -37,7 +37,7 @@ class WareModel
         $this->header = ["Content-type:application/x-www-form-urlencoded","Authorization: APIKEY D95F1442A6734C59B705D88F9AC343BC"];
         $data['related_words'] = $keywords;
         $data['project_guid'] = $this->project_guid;
-        $result_info = $this->httpRequest($url,$data,$this->header);
+        $result_info = $this->httpRequest($url,$this->header,http_build_query($data));
         $result = json_decode($result_info,true);
         if(!$result){
             throw new Exception('接口请求失败!');
@@ -45,7 +45,7 @@ class WareModel
         if(isset($result['errcode']) && $result['errcode'] == 0){
             return true;
         }else{
-            throw new Exception('关键词更新失败!');
+            throw new Exception($result['errmsg']);
         }
     }
 
@@ -98,8 +98,7 @@ class WareModel
             $content = $result['data'][0]['content'];
             return $content;
         }else{
-            echo '接口请求失败!';
-            throw new Exception('单条数据内容获取失败');
+            throw new Exception($result['errmsg']);
         }
     }
 

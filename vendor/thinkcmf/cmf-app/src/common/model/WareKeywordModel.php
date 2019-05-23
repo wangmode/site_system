@@ -103,7 +103,7 @@ class WareKeywordModel extends Model
     {
         return self::where('status',self::STATUS_YES)
             ->field(['id','keyword','num','current_page','is_ware'])
-            ->limit(0,10)
+            ->limit(0,5)
             ->order(['order'=>'asc','id'=>'asc'])
             ->select();
     }
@@ -123,7 +123,7 @@ class WareKeywordModel extends Model
      */
     static public function updateKeywordApi()
     {
-//        return (new WareModel())->to_update_keyword(self::getWareKeywordData());
+        return (new WareModel())->to_update_keyword(self::getWareKeywordData());
     }
 
 
@@ -177,7 +177,7 @@ class WareKeywordModel extends Model
      */
     static public function getOrderByDesc()
     {
-        return self::order('order','desc')->value('order');
+        return (int)self::order('order','desc')->value('order');
     }
 
 

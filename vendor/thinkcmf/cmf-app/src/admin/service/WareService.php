@@ -17,10 +17,12 @@ use app\common\model\Article21Model;
 use app\common\model\ArticleData21Model;
 use app\common\model\NewsModel;
 use app\common\model\NewsDataModel;
+use think\Db;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
 use think\Exception;
 use think\exception\DbException;
+use ArticleException;
 
 class WareService
 {
@@ -28,7 +30,9 @@ class WareService
      * 分发接口
      * @throws DataNotFoundException
      * @throws DbException
+     * @throws Exception
      * @throws ModelNotFoundException
+     * @throws \think\exception\PDOException
      */
     static public function distribute()
     {
@@ -57,9 +61,14 @@ class WareService
                                     shuffle($catid_arr);
                                     $article_id_array[] = $article_id = $article->addArticle($item['keyword'],$catid_arr[0],$item['title'],$item['author_name'],$item['url'],$item['keyword'],'',$username[0],$item['platform_name']);
                                     $content = $ware->to_get_content($item['data_id']);
-                                    $article_data->addArticaleData($article_id,$content);
+                                    $article_data->addArticaleData($article_id,$content,$item['data_id']);
                                     WarehouseModel::delByDataId($item['data_id']);
-                                }catch (Exception $exception){
+                                }catch (ArticleException $exception){
+                                    $data = $exception->getArticleId();
+                                    if(empty($data) === false){
+                                        $article_data->delArticle($data['itemid']);
+                                        WarehouseModel::delByDataId($item['data_id']);
+                                    }
                                     echo  $exception->getMessage();
                                     continue;
                                 }

@@ -187,11 +187,11 @@
                                 }else{
                                     var index =  layer.alert(res.message, {icon: 6},function () {
                                         //关闭当前frame
-                                        parent.layer.close(index);
-                                        parent.layui.table.reload('dataTable');
+                                        layer.close(index);
+                                        layui.table.reload('dataTable');
                                         // window.parent.location.reload();
                                     });
-                                    return false;
+                                    // return false;
                                 }
                             },
                             error : function(XMLHttpRequest, textStatus, errorThrown) {

@@ -9,6 +9,7 @@
 namespace app\common\model;
 
 
+use think\Exception;
 use think\Model;
 
 class ArticleData21Model extends Model
@@ -50,13 +51,19 @@ class ArticleData21Model extends Model
     /**
      * @param $itemid
      * @param $content
+     * @param $data_id
+     * @throws \ArticleException
      */
-    public function addArticaleData($itemid,$content)
+    public function addArticaleData($itemid,$content,$data_id)
     {
-        self::insert([
-            'itemid'=>$itemid,
-            'content'=>$content
-        ]);
+        try{
+            self::insert([
+                'itemid'=>$itemid,
+                'content'=>$content
+            ]);
+        }catch (Exception $exception){
+            throw new \ArticleException($exception->getMessage(),$itemid,$data_id);
+        }
     }
 
 
