@@ -98,9 +98,9 @@ class Article21Model extends Model
      * @param $itemids
      * @return Article21Model
      */
-    public function updateLinkUrl($itemids)
+    public function updateLinkUrl($itemid)
     {
-        return self::whereIn('itemid',$itemids)->exp('linkurl',"concat('show.php?itemid=',`itemid`)")->update();
+        return self::where('itemid',$itemid)->exp('linkurl',"concat('show.php?itemid=',`itemid`)")->update();
     }
 
     /**

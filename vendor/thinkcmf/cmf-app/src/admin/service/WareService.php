@@ -36,6 +36,7 @@ class WareService
      */
     static public function distribute()
     {
+        set_time_limit(0);
         $info = WarehouseModel::getWarehouseCount();
         $ware = new WareModel();
         foreach ($info as $key=>$value){
@@ -54,15 +55,16 @@ class WareService
                             $article->modelInit($v);
                             $article_data = new ArticleData21Model($v);
                             $article_data->modelInit($v);
-                            $article_id_array = [];
                             foreach ($warehouse as $item){
                                 try{
                                     shuffle($username);
                                     shuffle($catid_arr);
-                                    $article_id_array[] = $article_id = $article->addArticle($item['keyword'],$catid_arr[0],$item['title'],$item['author_name'],$item['url'],$item['keyword'],'',$username[0],$item['platform_name']);
-                                    $content = $ware->to_get_content($item['data_id']);
-                                    $article_data->addArticaleData($article_id,$content,$item['data_id']);
-                                    WarehouseModel::delByDataId($item['data_id']);
+                                    $article_id = $article->addArticle($item['keyword'],$catid_arr[0],$item['title'],$item['author_name'],$item['url'],$item['keyword'],'',$username[0],$item['platform_name']);
+                                    $article->updateLinkUrl($article_id);
+                                    $content = $ware->to_get_content(44790798);
+                                    usleep(10);
+                                    $article_data->addArticaleData($article_id,$content,44790798);
+                                    WarehouseModel::delByDataId(44790798);
                                 }catch (ArticleException $exception){
                                     $data = $exception->getArticleId();
                                     if(empty($data) === false){
@@ -70,10 +72,13 @@ class WareService
                                         WarehouseModel::delByDataId($item['data_id']);
                                     }
                                     echo  $exception->getMessage();
+                                    die;
+                                    continue;
+                                }catch (Exception $e){
+                                    echo  $e->getMessage();
                                     continue;
                                 }
                             }
-                            $article->updateLinkUrl($article_id_array);
                         }
                     }
                 }
