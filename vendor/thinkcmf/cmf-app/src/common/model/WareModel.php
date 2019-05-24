@@ -160,8 +160,8 @@ class WareModel
                             $info['collect_time']   = date('Y-m-d H:i:s',strtotime($result_data[$key]['add_time']));
                             $info['publish_time']   = date('Y-m-d H:i:s',strtotime($result_data[$key]['publish_time']));
                         }
+                        $data[]= $info;
                     }
-                    $data[]= $info;
                 }
                 $num = $num+count($data);
                 WarehouseModel::addWarehouseAll(array_filter($data));
