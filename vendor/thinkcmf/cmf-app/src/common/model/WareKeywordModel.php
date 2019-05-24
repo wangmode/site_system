@@ -132,7 +132,7 @@ class WareKeywordModel extends Model
      * @param $order
      * @return int|string
      */
-    static public function addKeyword($keyword,$order)
+    static public function addKeyword($keyword,$order,$is_ware)
     {
         return (new WareKeywordModel)->insert([
             'num'           =>0,
@@ -141,8 +141,8 @@ class WareKeywordModel extends Model
             'page_num'      =>10,
             'order'         =>$order,
             'keyword'       =>$keyword,
+            'is_ware'       =>$is_ware,
             'status'        =>self::STATUS_YES,
-            'is_ware'       =>self::IS_WARE_YES,
             'admin_id'      =>cmf_get_current_admin_id(),
             'created_at'    =>date('Y-m-d H:i:s',time())
         ]);
@@ -164,11 +164,9 @@ class WareKeywordModel extends Model
      */
     static public function newAddKeyword($keyword)
     {
-        if(self::getKeywrodCount() >= 10){
-            throw new Exception('关键词个数不得大于10个');
-        }
+        $is_ware = self::getKeywrodCount() >= 10?self::IS_WARE_NO:self::IS_WARE_YES;
         $order = self::getOrderByDesc();
-        self::addKeyword($keyword,$order);
+        self::addKeyword($keyword,$order,$is_ware);
         return self::updateKeywordApi();
     }
 
