@@ -22,7 +22,9 @@ class WareModel
     public function __construct()
     {
         $this->header =  ["Content-type:application/x-www-form-urlencoded","Authorization: APIKEY 478A032D810942EA98028A7758980A6B"];
-        $this->project_guid = '7f5c2e94-0b08-e911-8db2-c81f66ed8109';
+//        $this->project_guid = '7f5c2e94-0b08-e911-8db2-c81f66ed8109';
+        $this->project_guid = 'e0def36b-fa7c-e911-8db5-c81f66f777c4';
+
     }
 
 
@@ -34,7 +36,7 @@ class WareModel
      */
     public function to_update_keyword($keywords){
         $url = 'http://apis.ciliuti.com/ciliuti/updateword';
-        $this->header = ["Content-type:application/x-www-form-urlencoded","Authorization: APIKEY D95F1442A6734C59B705D88F9AC343BC"];
+//        $this->header = ["Content-type:application/x-www-form-urlencoded","Authorization: APIKEY D95F1442A6734C59B705D88F9AC343BC"];
         $data['related_words'] = $keywords;
         $data['project_guid'] = $this->project_guid;
         $result_info = $this->httpRequest($url,$this->header,http_build_query($data));
@@ -136,6 +138,7 @@ class WareModel
     public function to_export_title($keyword_id,$keyword,$page,$num)
     {
         do{
+            usleep(100);
             $data = [];
             $result = $this->get_title_list($keyword, $page);
             if(isset($result['errcode']) && $result['errcode'] == 0){

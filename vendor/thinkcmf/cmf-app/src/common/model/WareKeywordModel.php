@@ -320,16 +320,29 @@ class WareKeywordModel extends Model
         return self::where('id',$keyword_id)->setInc('order');
     }
 
+    /**
+     * @param $keyword_id
+     * @param $is_ware
+     * @return WareKeywordModel
+     */
     static public function updateIsWare($keyword_id,$is_ware)
     {
         return self::update(['id'=>$keyword_id,'is_ware'=>$is_ware]);
     }
 
+    /**
+     * @param $keyword_id
+     * @return WareKeywordModel
+     */
     static public function updateIsWareYes($keyword_id)
     {
         return self::updateIsWare($keyword_id,self::IS_WARE_YES);
     }
 
+    /**
+     * @param $keyword_id
+     * @return WareKeywordModel
+     */
     static public function updateIsWareNo($keyword_id)
     {
         return self::updateIsWare($keyword_id,self::IS_WARE_NO);
@@ -345,7 +358,7 @@ class WareKeywordModel extends Model
     static public function updateKeywordInfo($keyword_id,$num,$current_page,$total)
     {
         return self::update([
-            'id'            =>  $keyword_id,
+            'id'            =>$keyword_id,
             'num'           =>$num,
             'total'         =>$total,
             'current_page'  =>$current_page
