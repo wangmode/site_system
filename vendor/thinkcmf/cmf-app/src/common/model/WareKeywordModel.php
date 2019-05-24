@@ -153,7 +153,7 @@ class WareKeywordModel extends Model
      */
     static public function getKeywrodCount()
     {
-        return self::where('1=1')->count();
+        return self::where('is_ware',self::IS_WARE_YES)->count();
     }
 
 
@@ -164,8 +164,8 @@ class WareKeywordModel extends Model
      */
     static public function newAddKeyword($keyword)
     {
-        if(self::getKeywrodCount() >= 200){
-            throw new Exception('关键词个数不得大于200个');
+        if(self::getKeywrodCount() >= 10){
+            throw new Exception('关键词个数不得大于10个');
         }
         $order = self::getOrderByDesc();
         self::addKeyword($keyword,$order);
