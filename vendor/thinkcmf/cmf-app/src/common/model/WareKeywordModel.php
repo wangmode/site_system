@@ -292,6 +292,9 @@ class WareKeywordModel extends Model
     {
         $is_ware = self::getKeywrodIsWare($id);
         $is_ware = $is_ware == self::IS_WARE_YES ? self::IS_WARE_NO : self::IS_WARE_YES;
+        if($is_ware === self::IS_WARE_YES && self::getKeywrodCount() >= 10){
+            throw new Exception('采集关键词个数不得大于10个');
+        }
         self::updateIsWare($id,$is_ware);
         self::updateKeywordApi();
         return self::getKeywrodIsWare($id);
