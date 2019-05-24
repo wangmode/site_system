@@ -36,7 +36,7 @@ class WareModel
      */
     public function to_update_keyword($keywords){
         $url = 'http://apis.ciliuti.com/ciliuti/updateword';
-//        $this->header = ["Content-type:application/x-www-form-urlencoded","Authorization: APIKEY D95F1442A6734C59B705D88F9AC343BC"];
+        $this->header = ["Content-type:application/x-www-form-urlencoded","Authorization: APIKEY D95F1442A6734C59B705D88F9AC343BC"];
         $data['related_words'] = $keywords;
         $data['project_guid'] = $this->project_guid;
         $result_info = $this->httpRequest($url,$this->header,http_build_query($data));
@@ -198,6 +198,5 @@ class WareModel
 
         }
     }
-
 
 }
