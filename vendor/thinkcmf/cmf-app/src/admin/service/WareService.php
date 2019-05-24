@@ -26,6 +26,7 @@ use app\common\Exception\ArticleException;
 
 class WareService
 {
+    const NUM = 10;
     /**
      * 分发接口
      * @throws DataNotFoundException
@@ -42,7 +43,7 @@ class WareService
         foreach ($info as $key=>$value){
             $web = WebKeywordModel::getWebByKeywordId($value['keyword_id']);
             if(empty($web) === false){
-                $num = ceil($value['num']/count($web));
+                $num = ceil(self::NUM/count($web));
                 foreach ($web as $k=>$v){
                     $warehouse= WarehouseModel::getWarehouseDataByKeywordId($value['keyword_id'],$num);
                     if(empty($warehouse) === false){
