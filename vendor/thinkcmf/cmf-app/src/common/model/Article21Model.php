@@ -102,7 +102,7 @@ class Article21Model extends Model
      */
     public function updateLinkUrl($itemid)
     {
-        return self::where('itemid',$itemid)->exp('linkurl',"concat('show.php?itemid=',`itemid`)")->update();
+        return self::where('itemid',$itemid)->exp('linkurl',"concat('show-',`itemid`,'.html')")->update();
     }
 
     /**
