@@ -84,7 +84,7 @@ class WarehouseModel extends Model
     static public function getWarehouseListData($keyword,$status,$page,$limit)
     {
         $where = [];
-        if(empty($keywrod) === false){
+        if(empty($keyword) === false){
             $keyword = trim($keyword);
             $where[]=['title|keyword','like',"%$keyword%"];
         }
