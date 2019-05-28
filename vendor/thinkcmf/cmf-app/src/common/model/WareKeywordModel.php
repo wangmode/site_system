@@ -130,6 +130,7 @@ class WareKeywordModel extends Model
     /**
      * @param $keyword
      * @param $order
+     * @param $is_ware
      * @return int|string
      */
     static public function addKeyword($keyword,$order,$is_ware)
@@ -151,7 +152,7 @@ class WareKeywordModel extends Model
     /**
      * @return float|string
      */
-    static public function getKeywrodCount()
+    static public function getKeywordCount()
     {
         return self::where('is_ware',self::IS_WARE_YES)->count();
     }
@@ -164,7 +165,7 @@ class WareKeywordModel extends Model
      */
     static public function newAddKeyword($keyword)
     {
-        $is_ware = self::getKeywrodCount() >= 10?self::IS_WARE_NO:self::IS_WARE_YES;
+        $is_ware = self::getKeywordCount() >= 10?self::IS_WARE_NO:self::IS_WARE_YES;
         $order = self::getOrderByDesc();
         self::addKeyword($keyword,$order,$is_ware);
         return self::updateKeywordApi();
@@ -195,7 +196,7 @@ class WareKeywordModel extends Model
      * @param $id
      * @return mixed
      */
-    static public function getKeywrodStatus($id)
+    static public function getKeywordStatus($id)
     {
         return self::where('id',$id)->value('status');
     }
@@ -204,9 +205,18 @@ class WareKeywordModel extends Model
      * @param $id
      * @return mixed
      */
-    static public function getKeywrodIsWare($id)
+    static public function getKeywordIsWare($id)
     {
         return self::where('id',$id)->value('is_ware');
+    }
+
+    /**
+     * @param $id
+     * @return mixed
+     */
+    static public function getKeyword($id)
+    {
+        return self::where('id',$id)->value('keyword');
     }
 
     /**
@@ -214,7 +224,7 @@ class WareKeywordModel extends Model
      * @param $status
      * @return WareKeywordModel
      */
-    static public function updateKeywrodStatus($id,$status)
+    static public function updateKeywordStatus($id,$status)
     {
         $info = [
             'id'        =>$id,
@@ -236,7 +246,7 @@ class WareKeywordModel extends Model
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    static public function getNotWebKeywrodData($web_id,$keyword,$page,$limit)
+    static public function getNotWebKeywordData($web_id,$keyword,$page,$limit)
     {
         $where = [];
         if(empty($keyword) === false){
@@ -255,7 +265,7 @@ class WareKeywordModel extends Model
      * @param $keyword
      * @return float|string
      */
-    static public function getNotWebKeywrodCount($web_id,$keyword)
+    static public function getNotWebKeywordCount($web_id,$keyword)
     {
         $where = [];
         if(empty($keyword) === false){
@@ -275,10 +285,10 @@ class WareKeywordModel extends Model
      */
     static public function editKeywordStatus($id)
     {
-        $status = self::getKeywrodStatus($id);
+        $status = self::getKeywordStatus($id);
         $status = $status == self::STATUS_YES ? self::STATUS_NO : self::STATUS_YES;
-        self::updateKeywrodStatus($id,$status);
-        return self::getKeywrodStatus($id);
+        self::updateKeywordStatus($id,$status);
+        return self::getKeywordStatus($id);
     }
 
     /**
@@ -288,14 +298,14 @@ class WareKeywordModel extends Model
      */
     static public function editKeywordIsWare($id)
     {
-        $is_ware = self::getKeywrodIsWare($id);
+        $is_ware = self::getKeywordIsWare($id);
         $is_ware = $is_ware == self::IS_WARE_YES ? self::IS_WARE_NO : self::IS_WARE_YES;
-        if($is_ware === self::IS_WARE_YES && self::getKeywrodCount() >= 10){
+        if($is_ware === self::IS_WARE_YES && self::getKeywordCount() >= 10){
             throw new Exception('采集关键词个数不得大于10个');
         }
         self::updateIsWare($id,$is_ware);
         self::updateKeywordApi();
-        return self::getKeywrodIsWare($id);
+        return self::getKeywordIsWare($id);
     }
 
     /**
@@ -307,7 +317,7 @@ class WareKeywordModel extends Model
     static public function deleteKeyword($id)
     {
         self::delKeyword($id);
-        WebKeywordModel::delByKeywrodId($id);
+        WebKeywordModel::delByKeywordId($id);
         return self::updateKeywordApi();
     }
 
@@ -364,7 +374,17 @@ class WareKeywordModel extends Model
             'total'         =>$total,
             'current_page'  =>$current_page
         ]);
+    }
 
+    /**
+     * @return array|\PDOStatement|string|\think\Collection
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    static public function getWareKeywordList()
+    {
+        return self::field('id,keyword')->select();
     }
 
 

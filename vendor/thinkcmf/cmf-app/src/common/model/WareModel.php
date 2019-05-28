@@ -154,8 +154,9 @@ class WareModel
                             $info['url']            = $result_data[$i]['url'];
                             $info['title']          = $result_data[$i]['title'];
                             $info['data_id']        = $result_data[$i]['data_id'];
-                            $info['add_time']       = date('Y-m-d H:i:s',time());
+                            $info['status']         = WarehouseModel::STATUS_AUDITING;
                             $info['author_name']    = $result_data[$i]['author_name'];
+                            $info['add_time']       = date('Y-m-d H:i:s',time());
                             $info['platform_name']  = $result_data[$i]['platform_name'];
                             $info['collect_time']   = date('Y-m-d H:i:s',strtotime($result_data[$key]['add_time']));
                             $info['publish_time']   = date('Y-m-d H:i:s',strtotime($result_data[$key]['publish_time']));

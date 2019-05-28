@@ -39,7 +39,6 @@ class WareService
     {
         set_time_limit(0);
         $info = WarehouseModel::getWarehouseCount();
-        $ware = new WareModel();
         foreach ($info as $key=>$value){
             $web = WebKeywordModel::getWebByKeywordId($value['keyword_id']);
             if(empty($web) === false){
@@ -62,10 +61,7 @@ class WareService
                                     shuffle($catid_arr);
                                     $article_id = $article->addArticle($item['keyword'],$catid_arr[0],$item['title'],$item['author_name'],$item['url'],$item['keyword'],'',$username[0],$item['platform_name']);
                                     $article->updateLinkUrl($article_id);
-
-                                    $content = $ware->to_get_content($item['data_id']);
-                                    usleep(100);
-                                    $article_data->addArticaleData($article_id,$content,$item['data_id']);
+                                    $article_data->addArticaleData($article_id,$item['content'],$item['data_id']);
                                     WarehouseModel::delByDataId($item['data_id']);
                                 }catch (ArticleException $exception){
                                     $data = $exception->getArticleId();

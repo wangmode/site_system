@@ -243,8 +243,8 @@ class WebController extends AdminBaseController
             if(empty($web_id)){
                 throw new Exception('非法访问');
             }
-            $data   = WareKeywordModel::getNotWebKeywrodData($web_id,$keyword,$page,$limit);
-            $count  = WareKeywordModel::getNotWebKeywrodCount($web_id,$keyword);
+            $data   = WareKeywordModel::getNotWebKeywordData($web_id,$keyword,$page,$limit);
+            $count  = WareKeywordModel::getNotWebKeywordCount($web_id,$keyword);
             return $this->returnListJson(self::CODE_OK, $count, $data, '获取网站关键词列表成功');
         }catch (Exception $exception){
             return $this->returnListJson(self::CODE_FAIL, null, null, $exception->getMessage());

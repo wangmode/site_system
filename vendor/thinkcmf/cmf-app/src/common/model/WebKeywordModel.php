@@ -145,7 +145,7 @@ class WebKeywordModel extends Model
      * @throws \think\Exception
      * @throws \think\exception\PDOException
      */
-    static public function delByKeywrodId($keyword_id)
+    static public function delByKeywordId($keyword_id)
     {
         return self::where('keyword_id',$keyword_id)->delete();
     }

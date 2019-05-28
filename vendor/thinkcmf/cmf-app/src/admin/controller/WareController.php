@@ -9,6 +9,7 @@
 namespace app\admin\controller;
 
 
+use app\admin\service\WareService;
 use app\common\model\Article21Model;
 use app\common\model\ArticleData21Model;
 use app\common\model\CategoryModel;
@@ -20,6 +21,7 @@ use app\common\model\WareKeywordModel;
 use app\common\model\WareModel;
 use app\common\model\WebKeywordModel;
 use cmf\controller\AdminBaseController;
+use think\Db;
 use think\Exception;
 
 class WareController extends AdminBaseController
@@ -65,9 +67,12 @@ class WareController extends AdminBaseController
             if($validate !== true){
                 throw new Exception($validate);
             }
+            Db::startTrans();
             WareKeywordModel::newAddKeyword($data['keyword']);
+            Db::commit();
             return $this->returnJson(self::STATUS_OK,null,'添加新的关键词成功！');
         }catch (Exception $exception){
+            Db::rollback();
             return $this->returnJson(self::STATUS_FAIL,null,$exception->getMessage());
         }
     }
@@ -101,15 +106,16 @@ class WareController extends AdminBaseController
             if(empty($id) === true){
                 throw new Exception('非法访问');
             }
+
+            Db::startTrans();
             $status = WareKeywordModel::editKeywordIsWare($id);
+            Db::commit();
             return $this->returnStatusJson(self::STATUS_OK,$status,'变更关键词采集状态成功！');
         }catch (Exception $exception){
+            Db::rollback();
             return $this->returnStatusJson(self::STATUS_FAIL,null,$exception->getMessage());
         }
     }
-
-
-
 
 
     /**
@@ -123,7 +129,9 @@ class WareController extends AdminBaseController
             if(empty($id) === true){
                 throw new Exception('非法访问');
             }
+            Db::startTrans();
             WareKeywordModel::deleteKeyword($id);
+            Db::commit();
             return $this->returnJson(self::STATUS_OK,null,'删除关键词状成功！');
         }catch (Exception $exception){
             return $this->returnJson(self::STATUS_FAIL,null,$exception->getMessage());
