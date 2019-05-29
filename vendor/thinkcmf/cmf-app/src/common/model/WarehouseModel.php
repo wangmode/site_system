@@ -39,7 +39,7 @@ class WarehouseModel extends Model
      */
     static public function getWarehouseCount()
     {
-        return (new WarehouseModel)->where('status',self::STATUS_ADOPT)->group('keyword_id')->field(['keyword_id','count(*) as num'])->select();
+        return (new WarehouseModel)->where('status',self::STATUS_ADOPT)->where('content','<>','')->group('keyword_id')->field(['keyword_id','count(*) as num'])->select();
     }
 
 

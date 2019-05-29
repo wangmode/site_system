@@ -54,7 +54,7 @@ class CompanyModel extends Model
      */
     public function getUsernameData()
     {
-        return self::column('username');
+        return self::whereIn('groupid',[1,7])->column('username');
     }
 
     /**
